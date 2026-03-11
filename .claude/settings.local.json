@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter --version)",
+      "Bash(flutter create --org com.stylo --project-name stylo --description \"Simple fashion online shop with AI try-on feature\" .)",
+      "Bash(flutter pub add flutter_bloc equatable get_it go_router freezed_annotation json_annotation realm connectivity_plus shared_preferences)",
+      "Bash(flutter pub add geolocator flutter_background_service)",
+      "Bash(flutter pub add flutter_map latlong2 google_fonts cached_network_image shimmer showcaseview rxdart intl)",
+      "Bash(flutter pub add dev:build_runner dev:freezed dev:json_serializable dev:flutter_lints)",
+      "Bash(flutter pub remove realm)",
+      "Bash(flutter pub add dev:build_runner dev:freezed dev:json_serializable)",
+      "Bash(flutter pub add isar isar_flutter_libs)",
+      "Bash(flutter pub add dev:isar_generator)",
+      "Bash(flutter pub remove isar isar_flutter_libs)",
+      "Bash(flutter pub add drift sqlite3_flutter_libs)",
+      "Bash(flutter pub add dev:drift_dev)",
+      "Bash(flutter pub add uuid)",
+      "Bash(flutter analyze)",
+      "Bash(python3 -c \"import json, sys; data = json.load\\(sys.stdin\\); print\\(data[0][''text'']\\)\")",
+      "Bash(flutter analyze lib/core/)"
+    ]
+  }
+}
