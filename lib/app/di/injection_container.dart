@@ -77,6 +77,24 @@ import '../../features/orders/domain/repositories/orders_repository.dart';
 import '../../features/orders/domain/usecases/get_orders_usecase.dart';
 import '../../features/orders/domain/usecases/get_order_detail_usecase.dart';
 import '../../features/orders/presentation/bloc/orders_bloc.dart';
+import '../../features/orders/presentation/bloc/order_detail_bloc.dart';
+
+// Notifications
+import '../../features/notifications/data/datasources/notifications_remote_data_source.dart';
+import '../../features/notifications/data/repositories/notifications_repository_impl.dart';
+import '../../features/notifications/domain/repositories/notifications_repository.dart';
+import '../../features/notifications/domain/usecases/get_notifications_usecase.dart';
+import '../../features/notifications/domain/usecases/mark_as_read_usecase.dart';
+import '../../features/notifications/domain/usecases/mark_all_as_read_usecase.dart';
+import '../../features/notifications/presentation/bloc/notifications_bloc.dart';
+
+// Wishlist
+import '../../features/wishlist/data/datasources/wishlist_local_data_source.dart';
+import '../../features/wishlist/data/repositories/wishlist_repository_impl.dart';
+import '../../features/wishlist/domain/repositories/wishlist_repository.dart';
+import '../../features/wishlist/domain/usecases/get_wishlist_usecase.dart';
+import '../../features/wishlist/domain/usecases/toggle_wishlist_usecase.dart';
+import '../../features/wishlist/presentation/bloc/wishlist_bloc.dart';
 
 // Profile
 import '../../features/profile/data/datasources/profile_remote_data_source.dart';
@@ -239,6 +257,43 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetOrdersUseCase(sl()));
   sl.registerLazySingleton(() => GetOrderDetailUseCase(sl()));
   sl.registerFactory(() => OrdersBloc(getOrdersUseCase: sl()));
+  sl.registerFactory(
+    () => OrderDetailBloc(getOrderDetailUseCase: sl()),
+  );
+
+  // ─── Notifications ────────────────────────────────────────────────────────
+  sl.registerLazySingleton<NotificationsRemoteDataSource>(
+    () => NotificationsRemoteDataSourceImpl(apiClient: sl()),
+  );
+  sl.registerLazySingleton<NotificationsRepository>(
+    () => NotificationsRepositoryImpl(remoteDataSource: sl(), networkInfo: sl()),
+  );
+  sl.registerLazySingleton(() => GetNotificationsUseCase(sl()));
+  sl.registerLazySingleton(() => MarkAsReadUseCase(sl()));
+  sl.registerLazySingleton(() => MarkAllAsReadUseCase(sl()));
+  sl.registerFactory(
+    () => NotificationsBloc(
+      getNotificationsUseCase: sl(),
+      markAsReadUseCase: sl(),
+      markAllAsReadUseCase: sl(),
+    ),
+  );
+
+  // ─── Wishlist ─────────────────────────────────────────────────────────────
+  sl.registerLazySingleton<WishlistLocalDataSource>(
+    () => WishlistLocalDataSourceImpl(prefs: sl()),
+  );
+  sl.registerLazySingleton<WishlistRepository>(
+    () => WishlistRepositoryImpl(localDataSource: sl()),
+  );
+  sl.registerLazySingleton(() => GetWishlistUseCase(sl()));
+  sl.registerLazySingleton(() => ToggleWishlistUseCase(sl()));
+  sl.registerLazySingleton(
+    () => WishlistBloc(
+      getWishlistUseCase: sl(),
+      toggleWishlistUseCase: sl(),
+    ),
+  );
 
   // ─── Profile ──────────────────────────────────────────────────────────────
   sl.registerLazySingleton<ProfileRemoteDataSource>(

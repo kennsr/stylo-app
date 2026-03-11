@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -7,6 +8,10 @@ import 'package:shimmer/shimmer.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/product.dart';
 import '../../../../core/theme/theme_ext.dart';
+import '../../../wishlist/domain/entities/wishlist_product.dart';
+import '../../../wishlist/presentation/bloc/wishlist_bloc.dart';
+import '../../../wishlist/presentation/bloc/wishlist_event.dart';
+import '../../../wishlist/presentation/bloc/wishlist_state.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -136,6 +141,59 @@ class ProductCard extends StatelessWidget {
                         ),
                       ),
                     ),
+                  // Wishlist heart — bottom-right
+                  Positioned(
+                    bottom: 6,
+                    right: 6,
+                    child: BlocBuilder<WishlistBloc, WishlistState>(
+                      builder: (context, wishState) {
+                        final isLiked = wishState is WishlistLoaded &&
+                            wishState.isWishlisted(product.id);
+                        return GestureDetector(
+                          onTap: () {
+                            context.read<WishlistBloc>().add(
+                                  WishlistToggle(
+                                    WishlistProduct(
+                                      id: product.id,
+                                      name: product.name,
+                                      price: product.price,
+                                      discountPrice: product.discountPrice,
+                                      imageUrl: product.images.isNotEmpty
+                                          ? product.images.first
+                                          : '',
+                                      category: product.category,
+                                      rating: product.rating,
+                                    ),
+                                  ),
+                                );
+                          },
+                          child: Container(
+                            width: 30,
+                            height: 30,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.12),
+                                  blurRadius: 4,
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              isLiked
+                                  ? Icons.favorite_rounded
+                                  : Icons.favorite_border_rounded,
+                              size: 16,
+                              color: isLiked
+                                  ? AppColors.accent
+                                  : AppColors.lightSecondaryText,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
                 ],
               ),
             ),

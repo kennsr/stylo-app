@@ -100,6 +100,11 @@ class _ProfilePageState extends State<ProfilePage> {
                       title: 'Pesanan Saya',
                       onTap: () => context.go('/orders'),
                     ),
+                    MenuTile(
+                      icon: Icons.favorite_border_rounded,
+                      title: 'Wishlist Saya',
+                      onTap: () => context.push('/profile/wishlist'),
+                    ),
                   ],
                 ),
                 _MenuSection(

@@ -102,6 +102,32 @@ class ApiClient {
     }
   }
 
+  Future<Map<String, dynamic>> patch(
+    String path, {
+    Map<String, dynamic>? body,
+  }) async {
+    if (EnvConfig.useMock) {
+      await Future.delayed( Duration(milliseconds: 500));
+      return MockApiData.getMockResponse(path, method: 'PATCH');
+    }
+    try {
+      final response = await httpClient
+          .patch(
+            _buildUri(path),
+            headers: _headers,
+            body: jsonEncode(body ?? {}),
+          )
+          .timeout(ApiConstants.receiveTimeout);
+      return _handleResponse(response);
+    } on ServerException {
+      rethrow;
+    } on AuthException {
+      rethrow;
+    } catch (e) {
+      throw NetworkException(message: e.toString());
+    }
+  }
+
   Future<Map<String, dynamic>> delete(String path) async {
     if (EnvConfig.useMock) {
       await Future.delayed( Duration(milliseconds: 500));

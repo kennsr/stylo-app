@@ -118,7 +118,7 @@ class _HomePageState extends State<HomePage> {
             Icons.notifications_outlined,
             color: context.primaryTextColor,
           ),
-          onPressed: () {},
+          onPressed: () => context.push('/notifications'),
           tooltip: 'Notifikasi',
         ),
         BlocBuilder<CartBloc, CartState>(

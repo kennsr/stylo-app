@@ -45,8 +45,19 @@ import '../features/checkout/domain/entities/placed_order.dart';
 
 // Orders
 import '../features/orders/presentation/bloc/orders_bloc.dart';
+import '../features/orders/presentation/bloc/order_detail_bloc.dart';
 import '../features/orders/presentation/pages/orders_page.dart';
 import '../features/orders/presentation/pages/order_detail_page.dart';
+
+// Notifications
+import '../features/notifications/presentation/bloc/notifications_bloc.dart';
+import '../features/notifications/presentation/bloc/notifications_event.dart';
+import '../features/notifications/presentation/pages/notifications_page.dart';
+
+// Wishlist
+import '../features/wishlist/presentation/bloc/wishlist_bloc.dart';
+import '../features/wishlist/presentation/bloc/wishlist_event.dart';
+import '../features/wishlist/presentation/pages/wishlist_page.dart';
 
 // Profile
 import '../features/profile/presentation/bloc/profile_bloc.dart';
@@ -82,6 +93,9 @@ class StyloApp extends StatelessWidget {
         ),
         BlocProvider<CartBloc>(
           create: (_) => di.sl<CartBloc>()..add(const CartFetch()),
+        ),
+        BlocProvider<WishlistBloc>(
+          create: (_) => di.sl<WishlistBloc>()..add(const WishlistLoad()),
         ),
         BlocProvider<ThemeCubit>(
           create: (_) => di.sl<ThemeCubit>()..loadSavedTheme(),
@@ -217,6 +231,17 @@ class StyloApp extends StatelessWidget {
                     ),
                   ],
                 ),
+                GoRoute(
+                  path: '/notifications',
+                  pageBuilder: (context, state) => _fadePage(
+                    state,
+                    BlocProvider(
+                      create: (_) => di.sl<NotificationsBloc>()
+                        ..add(const NotificationsFetch()),
+                      child: const NotificationsPage(),
+                    ),
+                  ),
+                ),
               ],
             ),
 
@@ -265,7 +290,7 @@ class StyloApp extends StatelessWidget {
                       pageBuilder: (context, state) => _fadePage(
                         state,
                         BlocProvider(
-                          create: (_) => di.sl<OrdersBloc>(),
+                          create: (_) => di.sl<OrderDetailBloc>(),
                           child: OrderDetailPage(
                             orderId: state.pathParameters['id']!,
                           ),
@@ -299,6 +324,11 @@ class StyloApp extends StatelessWidget {
                           child: const EditProfilePage(),
                         ),
                       ),
+                    ),
+                    GoRoute(
+                      path: 'wishlist',
+                      pageBuilder: (context, state) =>
+                          _fadePage(state, const WishlistPage()),
                     ),
                   ],
                 ),

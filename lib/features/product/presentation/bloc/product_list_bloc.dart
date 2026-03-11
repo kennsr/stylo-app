@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../domain/entities/product.dart';
 import '../../domain/usecases/get_products_usecase.dart';
 import 'product_list_event.dart';
 import 'product_list_state.dart';
@@ -9,11 +10,15 @@ class ProductListBloc extends Bloc<ProductListEvent, ProductListState> {
 
   String? _currentCategory;
   String? _currentSearch;
+  ProductSortOption _currentSort = ProductSortOption.terbaru;
+  double? _currentMinPrice;
+  double? _currentMaxPrice;
 
   ProductListBloc({required this.getProductsUseCase})
-      : super( ProductListInitial()) {
+      : super(const ProductListInitial()) {
     on<ProductListFetch>(_onFetch);
     on<ProductListLoadMore>(_onLoadMore);
+    on<ProductListApplyFilter>(_onApplyFilter);
   }
 
   Future<void> _onFetch(
@@ -22,8 +27,11 @@ class ProductListBloc extends Bloc<ProductListEvent, ProductListState> {
   ) async {
     _currentCategory = event.category;
     _currentSearch = event.search;
+    _currentSort = event.sort;
+    _currentMinPrice = event.minPrice;
+    _currentMaxPrice = event.maxPrice;
 
-    emit( ProductListLoading());
+    emit(const ProductListLoading());
 
     final result = await getProductsUseCase(
       GetProductsParams(
@@ -35,13 +43,25 @@ class ProductListBloc extends Bloc<ProductListEvent, ProductListState> {
 
     result.fold(
       (failure) => emit(ProductListError(message: failure.message)),
-      (products) => emit(
-        ProductListLoaded(
-          products: products,
-          hasMore: products.length >= AppConstants.defaultPageSize,
-          currentPage: 1,
-        ),
-      ),
+      (products) {
+        final filtered = _applySortAndFilter(
+          products,
+          _currentSort,
+          _currentMinPrice,
+          _currentMaxPrice,
+        );
+        emit(
+          ProductListLoaded(
+            products: filtered,
+            allProducts: products,
+            hasMore: products.length >= AppConstants.defaultPageSize,
+            currentPage: 1,
+            currentSort: _currentSort,
+            currentMinPrice: _currentMinPrice,
+            currentMaxPrice: _currentMaxPrice,
+          ),
+        );
+      },
     );
   }
 
@@ -65,13 +85,94 @@ class ProductListBloc extends Bloc<ProductListEvent, ProductListState> {
 
     result.fold(
       (failure) => emit(ProductListError(message: failure.message)),
-      (newProducts) => emit(
-        ProductListLoaded(
-          products: [...currentState.products, ...newProducts],
-          hasMore: newProducts.length >= AppConstants.defaultPageSize,
-          currentPage: nextPage,
-        ),
+      (newProducts) {
+        final combinedAll = [...currentState.allProducts, ...newProducts];
+        final filtered = _applySortAndFilter(
+          combinedAll,
+          _currentSort,
+          _currentMinPrice,
+          _currentMaxPrice,
+        );
+        emit(
+          ProductListLoaded(
+            products: filtered,
+            allProducts: combinedAll,
+            hasMore: newProducts.length >= AppConstants.defaultPageSize,
+            currentPage: nextPage,
+            currentSort: _currentSort,
+            currentMinPrice: _currentMinPrice,
+            currentMaxPrice: _currentMaxPrice,
+          ),
+        );
+      },
+    );
+  }
+
+  void _onApplyFilter(
+    ProductListApplyFilter event,
+    Emitter<ProductListState> emit,
+  ) {
+    final currentState = state;
+    if (currentState is! ProductListLoaded) return;
+
+    _currentSort = event.sort;
+    _currentMinPrice = event.minPrice;
+    _currentMaxPrice = event.maxPrice;
+
+    final filtered = _applySortAndFilter(
+      currentState.allProducts,
+      _currentSort,
+      _currentMinPrice,
+      _currentMaxPrice,
+    );
+
+    emit(
+      ProductListLoaded(
+        products: filtered,
+        allProducts: currentState.allProducts,
+        hasMore: currentState.hasMore,
+        currentPage: currentState.currentPage,
+        currentSort: _currentSort,
+        currentMinPrice: _currentMinPrice,
+        currentMaxPrice: _currentMaxPrice,
       ),
     );
+  }
+
+  List<Product> _applySortAndFilter(
+    List<Product> products,
+    ProductSortOption sort,
+    double? minPrice,
+    double? maxPrice,
+  ) {
+    var result = products.toList();
+
+    // Price filter
+    if (minPrice != null) {
+      result = result
+          .where((p) => (p.discountPrice ?? p.price) >= minPrice)
+          .toList();
+    }
+    if (maxPrice != null) {
+      result = result
+          .where((p) => (p.discountPrice ?? p.price) <= maxPrice)
+          .toList();
+    }
+
+    // Sort
+    switch (sort) {
+      case ProductSortOption.hargaTerendah:
+        result.sort((a, b) =>
+            (a.discountPrice ?? a.price).compareTo(b.discountPrice ?? b.price));
+      case ProductSortOption.hargaTertinggi:
+        result.sort((a, b) =>
+            (b.discountPrice ?? b.price).compareTo(a.discountPrice ?? a.price));
+      case ProductSortOption.ratingTertinggi:
+        result.sort((a, b) => b.rating.compareTo(a.rating));
+      case ProductSortOption.terbaru:
+        break; // keep original order
+    }
+
+    return result;
   }
 }
