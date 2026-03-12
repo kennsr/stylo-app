@@ -111,17 +111,30 @@ class AuthRepositoryImpl implements AuthRepository {
         // Never trust stale cache — it could be leftover from mock mode
         // or a previous session with an expired token.
         
-        // First check if session is valid (token exists, not expired, within max age)
-        final sessionValid = await localDataSource.isSessionValid();
-        if (!sessionValid) {
-          await localDataSource.clearSession();
-          return Left(AuthFailure(message: 'Sesi telah kadaluarsa, silakan login kembali'));
+        final token = await localDataSource.getSessionToken();
+        
+        // If no token, check legacy token for backward compatibility
+        if (token == null || token.isEmpty) {
+          final legacyToken = await localDataSource.getToken();
+          if (legacyToken != null && legacyToken.isNotEmpty) {
+            // Migrate to new session format
+            await localDataSource.cacheSessionToken(
+              legacyToken,
+              expiresAt: DateTime.now().add(const Duration(days: 30)),
+            );
+            await localDataSource.cacheLastLoginTime(DateTime.now());
+          } else {
+            await localDataSource.clearSession();
+            return Left(AuthFailure(message: 'Sesi tidak ditemukan, silakan login'));
+          }
         }
         
-        final token = await localDataSource.getSessionToken();
-        if (token == null || token.isEmpty) {
-          await localDataSource.clearSession();
-          return Left(AuthFailure(message: 'Sesi tidak ditemukan, silakan login'));
+        // Check session validity (token expiry and max age)
+        // But be lenient - if we have a token, let the server decide if it's valid
+        final sessionValid = await localDataSource.isSessionValid();
+        if (!sessionValid) {
+          // Don't clear session yet - let server validate
+          // This allows users to complete onboarding even if session is slightly old
         }
         
         if (!await networkInfo.isConnected) {
@@ -143,6 +156,8 @@ class AuthRepositoryImpl implements AuthRepository {
         // Hit GET /auth/me — throws AuthException on 401 (invalid/expired token)
         final userModel = await remoteDataSource.getCurrentUser();
         await localDataSource.cacheUser(userModel);
+        // Update session timestamp on successful validation
+        await localDataSource.cacheLastLoginTime(DateTime.now());
         return Right(userModel.toEntity());
       }
 

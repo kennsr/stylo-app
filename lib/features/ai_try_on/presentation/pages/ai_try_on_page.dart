@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/error_handler.dart';
 import '../../domain/entities/body_avatar.dart';
 import '../bloc/ai_try_on_bloc.dart';
 import '../bloc/ai_try_on_event.dart';
@@ -76,7 +77,10 @@ class _AiTryOnPageState extends State<AiTryOnPage> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
           color: context.primaryTextColor,
-          onPressed: () => Navigator.maybePop(context),
+          onPressed: () {
+            // Navigate back - pop the current page
+            Navigator.of(context).pop();
+          },
         ),
         title: Text(
           'AI Virtual Try-On',
@@ -113,7 +117,11 @@ class _AiTryOnPageState extends State<AiTryOnPage> {
             return _buildResultState(state);
           }
           if (state is AiTryOnError) {
-            return _buildErrorState(state.message);
+            // Use environment-specific error messages
+            final errorMessage = ErrorHandler.getMessage(
+              rawMessage: state.message,
+            );
+            return _buildErrorState(errorMessage);
           }
           // Initial / avatars loading / after reset: input selection
           return _buildInputSelectionState();
@@ -472,7 +480,9 @@ class _AiTryOnPageState extends State<AiTryOnPage> {
   Widget _buildResultState(AiTryOnSuccess state) {
     return Column(
       children: [
+        // Image result takes most of the screen
         Expanded(
+          flex: 2,
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -480,101 +490,170 @@ class _AiTryOnPageState extends State<AiTryOnPage> {
               children: [
                 TryOnResultView(result: state.result),
                 const SizedBox(height: 20),
-                // Save and share buttons
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Gambar disimpan',
-                                style: GoogleFonts.poppins(fontSize: 13),
-                              ),
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                          );
-                        },
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: context.primaryTextColor,
-                          side: BorderSide(color: context.borderColor),
-                          padding:
-                              const EdgeInsets.symmetric(vertical: 13),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        icon: const Icon(Icons.download_rounded, size: 18),
-                        label: Text(
-                          'Simpan',
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Bagikan gambar',
-                                style: GoogleFonts.poppins(fontSize: 13),
-                              ),
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.accent,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          padding:
-                              const EdgeInsets.symmetric(vertical: 13),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        icon: const Icon(Icons.share_rounded, size: 18),
-                        label: Text(
-                          'Bagikan',
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                // Action buttons: Save & Share (secondary actions)
+                _buildActionButtons(),
                 const SizedBox(height: 16),
                 _buildDisclaimer(),
               ],
             ),
           ),
         ),
-        // Sticky bottom CTA
-        Container(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border(
-              top: BorderSide(color: context.borderColor),
+        // Sticky bottom bar: Primary actions (Coba Lagi & Add to Cart)
+        _buildBottomActionBar(),
+      ],
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Row 1: Save and Share
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Gambar disimpan',
+                        style: GoogleFonts.poppins(fontSize: 13),
+                      ),
+                      behavior: SnackBarBehavior.floating,
+                      backgroundColor: AppColors.success,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  );
+                },
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: context.primaryTextColor,
+                  side: BorderSide(color: context.borderColor),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.download_rounded, size: 18),
+                label: Text(
+                  'Simpan',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
             ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Bagikan gambar',
+                        style: GoogleFonts.poppins(fontSize: 13),
+                      ),
+                      behavior: SnackBarBehavior.floating,
+                      backgroundColor: AppColors.info,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  );
+                },
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: context.primaryTextColor,
+                  side: BorderSide(color: context.borderColor),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.share_rounded, size: 18),
+                label: Text(
+                  'Bagikan',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBottomActionBar() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+      decoration: BoxDecoration(
+        color: context.backgroundColor,
+        border: Border(
+          top: BorderSide(color: context.dividerColor, width: 1),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, -4),
           ),
-          child: Row(
-            children: [
-              OutlinedButton(
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Primary action: Add to Cart
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Ditambahkan ke keranjang',
+                        style: GoogleFonts.poppins(fontSize: 13),
+                      ),
+                      behavior: SnackBarBehavior.floating,
+                      backgroundColor: AppColors.success,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.accent,
+                  foregroundColor: Colors.white,
+                  elevation: 2,
+                  shadowColor: AppColors.accent.withValues(alpha: 0.4),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.shopping_cart_rounded, size: 20),
+                label: Text(
+                  'Tambah ke Keranjang',
+                  style: GoogleFonts.poppins(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            // Secondary action: Try Again
+            SizedBox(
+              width: double.infinity,
+              height: 44,
+              child: OutlinedButton.icon(
                 onPressed: () {
                   context.read<AiTryOnBloc>().add(const AiTryOnReset());
                   setState(() {
@@ -583,66 +662,26 @@ class _AiTryOnPageState extends State<AiTryOnPage> {
                   });
                 },
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: context.primaryTextColor,
+                  foregroundColor: context.secondaryTextColor,
                   side: BorderSide(color: context.borderColor),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 13,
-                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text(
+                icon: const Icon(Icons.refresh_rounded, size: 18),
+                label: Text(
                   'Coba Lagi',
                   style: GoogleFonts.poppins(
                     fontSize: 14,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: SizedBox(
-                  height: 50,
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Ditambahkan ke keranjang',
-                            style: GoogleFonts.poppins(fontSize: 13),
-                          ),
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.accent,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    icon: const Icon(Icons.shopping_cart_outlined, size: 18),
-                    label: Text(
-                      'Tambah ke Keranjang',
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 

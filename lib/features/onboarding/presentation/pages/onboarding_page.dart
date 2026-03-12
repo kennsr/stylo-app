@@ -101,11 +101,18 @@ class _OnboardingPageState extends State<OnboardingPage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        // If trying to pop and there's an error, allow navigation to login
+        if (!didPop) {
+          Navigator.of(context).pushReplacementNamed('/login');
+        }
+      },
       child: BlocConsumer<OnboardingCubit, OnboardingState>(
         listener: (context, state) {
           if (state.isComplete) {
             context.go('/home');
           } else if (state.error != null) {
+            // Show error with option to go back to login
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
@@ -117,6 +124,14 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
+                action: SnackBarAction(
+                  label: 'Login',
+                  textColor: Colors.white,
+                  onPressed: () {
+                    context.go('/login');
+                  },
+                ),
+                duration: const Duration(seconds: 5),
               ),
             );
           }
@@ -169,62 +184,82 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 
   Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
-      child: Row(
-        children: [
-          // Logo + brand
-          Row(
+    return BlocBuilder<OnboardingCubit, OnboardingState>(
+      builder: (context, state) {
+        final hasError = state.error != null;
+        
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+          child: Row(
             children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: const BoxDecoration(
-                  color: AppColors.accent,
-                  shape: BoxShape.circle,
+              // Logo + brand
+              Row(
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: const BoxDecoration(
+                      color: AppColors.accent,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'S',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Stylo',
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: context.primaryTextColor,
+                    ),
+                  ),
+                ],
+              ),
+              const Spacer(),
+              // Close button (shows on error)
+              if (hasError)
+                IconButton(
+                  icon: const Icon(Icons.close_rounded),
+                  onPressed: () {
+                    context.go('/login');
+                  },
+                  tooltip: 'Tutup',
+                  style: IconButton.styleFrom(
+                    backgroundColor: AppColors.error,
+                    foregroundColor: Colors.white,
+                  ),
                 ),
-                child: const Center(
+              // Step counter
+              if (!hasError)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: context.surfaceColor,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
                   child: Text(
-                    'S',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 16,
+                    '${_step + 1} / $_totalSteps  ${_stepTitles[_step]}',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: context.secondaryTextColor,
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Stylo',
-                style: GoogleFonts.poppins(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: context.primaryTextColor,
-                ),
-              ),
             ],
           ),
-          const Spacer(),
-          // Step counter
-          Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-            decoration: BoxDecoration(
-              color: context.surfaceColor,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              '${_step + 1} / $_totalSteps  ${_stepTitles[_step]}',
-              style: GoogleFonts.poppins(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: context.secondaryTextColor,
-              ),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 

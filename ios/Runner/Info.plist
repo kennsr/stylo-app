@@ -35,6 +35,12 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Kami memerlukan akses kamera untuk mengambil foto produk yang ingin kamu coba dengan AI Try-On</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Kami memerlukan akses galeri foto untuk memilih foto yang akan digunakan dengan AI Try-On</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Kami memerlukan akses untuk menyimpan hasil AI Try-On ke galeri foto kamu</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

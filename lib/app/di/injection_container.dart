@@ -243,6 +243,7 @@ Future<void> init() async {
       generateTryOnUseCase: sl(),
       getTryOnHistoryUseCase: sl(),
       getAvatarsUseCase: sl(),
+      getFitProfileUseCase: sl(),
     ),
   );
 

@@ -1536,6 +1536,7 @@ class MockApiData {
   static Map<String, dynamic> getMockResponse(
     String path, {
     String method = 'GET',
+    Map<String, dynamic>? body,
   }) {
     // ---- Auth ----------------------------------------------------------------
     if (path == ApiConstants.login ||
@@ -2164,6 +2165,21 @@ class MockApiData {
 
     // ---- Profile -------------------------------------------------------------
     if (path == ApiConstants.profile) {
+      // Handle PUT request for profile update
+      if (method == 'PUT') {
+        return {
+          'message': 'Profile updated successfully',
+          'data': {
+            'id': 'user_rizki_01',
+            'email': 'rizki.pratama@gmail.com',
+            'name': body?['name'] ?? 'Rizki Pratama',
+            'phone': body?['phone'] ?? '081234567890',
+            'avatar_url': 'https://i.pravatar.cc/150?u=rizki',
+            'style_preferences': ['Casual', 'Streetwear'],
+          },
+        };
+      }
+      // GET request
       return {
         'message': 'Success',
         'data': {
@@ -2178,6 +2194,14 @@ class MockApiData {
     }
 
     if (path == '${ApiConstants.profile}/style-preferences') {
+      // Handle PUT request for updating style preferences
+      if (method == 'PUT') {
+        return {
+          'message': 'Style preferences updated successfully',
+          'data': null,
+        };
+      }
+      // GET request
       return {
         'message': 'Success',
         'data': [

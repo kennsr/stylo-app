@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/body_avatar.dart';
+import '../../domain/entities/fit_profile.dart';
 import '../../domain/entities/try_on_result.dart';
 
 abstract class AiTryOnState extends Equatable {
@@ -52,6 +53,24 @@ class AiTryOnHistoryLoaded extends AiTryOnState {
 
   @override
   List<Object?> get props => [results];
+}
+
+class AiTryOnFitProfileLoaded extends AiTryOnState {
+  final FitProfile profile;
+
+  const AiTryOnFitProfileLoaded({required this.profile});
+
+  @override
+  List<Object?> get props => [profile];
+}
+
+class AiTryOnFitProfileError extends AiTryOnState {
+  final String message;
+
+  const AiTryOnFitProfileError({required this.message});
+
+  @override
+  List<Object?> get props => [message];
 }
 
 class AiTryOnError extends AiTryOnState {

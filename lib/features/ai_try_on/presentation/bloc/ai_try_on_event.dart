@@ -33,6 +33,13 @@ class AiTryOnLoadHistory extends AiTryOnEvent {
   List<Object?> get props => [];
 }
 
+class AiTryOnGetFitProfile extends AiTryOnEvent {
+  const AiTryOnGetFitProfile();
+
+  @override
+  List<Object?> get props => [];
+}
+
 class AiTryOnReset extends AiTryOnEvent {
   const AiTryOnReset();
 

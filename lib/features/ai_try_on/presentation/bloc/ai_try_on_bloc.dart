@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/utils/usecase.dart';
 import '../../domain/usecases/generate_try_on_usecase.dart';
 import '../../domain/usecases/get_avatars_usecase.dart';
+import '../../domain/usecases/get_fit_profile_usecase.dart';
 import '../../domain/usecases/get_try_on_history_usecase.dart';
 import 'ai_try_on_event.dart';
 import 'ai_try_on_state.dart';
@@ -10,15 +11,18 @@ class AiTryOnBloc extends Bloc<AiTryOnEvent, AiTryOnState> {
   final GenerateTryOnUseCase generateTryOnUseCase;
   final GetTryOnHistoryUseCase getTryOnHistoryUseCase;
   final GetAvatarsUseCase getAvatarsUseCase;
+  final GetFitProfileUseCase getFitProfileUseCase;
 
   AiTryOnBloc({
     required this.generateTryOnUseCase,
     required this.getTryOnHistoryUseCase,
     required this.getAvatarsUseCase,
+    required this.getFitProfileUseCase,
   }) : super(const AiTryOnInitial()) {
     on<AiTryOnGenerate>(_onGenerate);
     on<AiTryOnLoadAvatars>(_onLoadAvatars);
     on<AiTryOnLoadHistory>(_onLoadHistory);
+    on<AiTryOnGetFitProfile>(_onGetFitProfile);
     on<AiTryOnReset>(_onReset);
   }
 
@@ -67,6 +71,20 @@ class AiTryOnBloc extends Bloc<AiTryOnEvent, AiTryOnState> {
     result.fold(
       (failure) => emit(AiTryOnError(message: failure.message)),
       (results) => emit(AiTryOnHistoryLoaded(results: results)),
+    );
+  }
+
+  Future<void> _onGetFitProfile(
+    AiTryOnGetFitProfile event,
+    Emitter<AiTryOnState> emit,
+  ) async {
+    emit(const AiTryOnGenerating());
+
+    final result = await getFitProfileUseCase(const NoParams());
+
+    result.fold(
+      (failure) => emit(const AiTryOnFitProfileError(message: 'Belum ada profil ukuran')),
+      (profile) => emit(AiTryOnFitProfileLoaded(profile: profile)),
     );
   }
 

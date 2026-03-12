@@ -6,7 +6,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/stylo_try_on_toggle.dart';
 import '../../../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../../../features/auth/presentation/bloc/auth_state.dart';
 import '../../domain/entities/product.dart';
@@ -34,7 +33,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   String? _selectedSize;
   String? _selectedColor;
   bool _descriptionExpanded = false;
-  bool _tryOnEnabled = false;
 
   @override
   void initState() {
@@ -330,6 +328,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   Padding(
                     padding:  EdgeInsets.fromLTRB(20, 20, 20, 0),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (sizes.isNotEmpty) ...[
                           SizeSelector(
@@ -353,17 +352,31 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       ],
                     ),
                   ),
-                // AI Try-On toggle
+                // AI Try-On button
                 if (product.hasAiTryOn) ...[
                    SizedBox(height: 20),
                   Container(height: 8, color: context.surfaceColor),
                   Padding(
-                    padding:  EdgeInsets.fromLTRB(20, 20, 20, 0),
+                    padding:  EdgeInsets.fromLTRB(20, 20, 20, 20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: AppColors.accent.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child:  Icon(
+                                Icons.auto_awesome_rounded,
+                                color: AppColors.accent,
+                                size: 22,
+                              ),
+                            ),
+                             SizedBox(width: 12),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -371,8 +384,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                   Text(
                                     'Stylo AI Try-On',
                                     style: GoogleFonts.poppins(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700,
                                       color: context.primaryTextColor,
                                     ),
                                   ),
@@ -386,47 +399,40 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 ],
                               ),
                             ),
-                            StyloTryOnToggle(
-                              isOn: _tryOnEnabled,
-                              onChanged: (val) {
-                                setState(() => _tryOnEnabled = val);
-                              },
-                            ),
                           ],
                         ),
-                        if (_tryOnEnabled) ...[
-                           SizedBox(height: 16),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 48,
-                            child: ElevatedButton.icon(
-                              onPressed: () => _requireAuth(() {
-                                context.go(
-                                  '/try-on?productId=${product.id}',
-                                );
-                              }),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.accent,
-                                foregroundColor: Colors.white,
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
+                         SizedBox(height: 16),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: ElevatedButton.icon(
+                            onPressed: () => _requireAuth(() {
+                              context.go(
+                                '/try-on?productId=${product.id}',
+                              );
+                            }),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.accent,
+                              foregroundColor: Colors.white,
+                              elevation: 2,
+                              shadowColor: AppColors.accent.withValues(alpha: 0.4),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                              icon:  Icon(
-                                Icons.view_in_ar_rounded,
-                                size: 18,
-                              ),
-                              label: Text(
-                                'Mulai AI Try-On',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                            ),
+                            icon:  Icon(
+                              Icons.view_in_ar_rounded,
+                              size: 22,
+                            ),
+                            label: Text(
+                              'Mulai AI Try-On',
+                              style: GoogleFonts.poppins(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                           ),
-                        ],
+                        ),
                       ],
                     ),
                   ),

@@ -14,7 +14,9 @@ class ApiClient {
   ApiClient({required this.httpClient, required this.prefs});
 
   Map<String, String> get _headers {
-    final token = prefs.getString(AppConstants.tokenKey);
+    // Try new session token first, then fall back to legacy token
+    final token = prefs.getString('stylo_session_token') 
+               ?? prefs.getString(AppConstants.tokenKey);
     return {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
