@@ -4,10 +4,11 @@ import '../../../../core/network/network_info.dart';
 import '../../../../core/utils/either.dart';
 import '../models/product_model.dart';
 import '../models/review_model.dart';
-import '../../domain/entities/product.dart';
-import '../../domain/entities/review.dart';
-import '../../domain/repositories/product_repository.dart';
-import '../datasources/product_remote_data_source.dart';
+import 'package:stylo/features/product/domain/entities/product.dart';
+import 'package:stylo/features/product/domain/entities/product_list_result.dart';
+import 'package:stylo/features/product/domain/entities/review.dart';
+import 'package:stylo/features/product/domain/repositories/product_repository.dart';
+import 'package:stylo/features/product/data/datasources/product_remote_data_source.dart';
 
 class ProductRepositoryImpl implements ProductRepository {
   final ProductRemoteDataSource remoteDataSource;
@@ -19,7 +20,7 @@ class ProductRepositoryImpl implements ProductRepository {
   });
 
   @override
-  Future<Either<Failure, List<Product>>> getProducts({
+  Future<Either<Failure, ProductListResult>> getProducts({
     String? category,
     String? search,
     int page = 1,
@@ -30,13 +31,28 @@ class ProductRepositoryImpl implements ProductRepository {
       return Left(NetworkFailure());
     }
     try {
-      final models = await remoteDataSource.getProducts(
+      final modelsFuture = remoteDataSource.getProducts(
         category: category,
         search: search,
         page: page,
         pageSize: pageSize,
       );
-      return Right(models.map((m) => m.toEntity()).toList());
+
+      // Only fetch count on the first page to optimize
+      final countFuture = page == 1
+          ? remoteDataSource.getProductCount(category: category, search: search)
+          : Future.value(-1); // -1 indicates we should use the previous total
+
+      final results = await Future.wait([modelsFuture, countFuture]);
+      final models = results[0] as List<ProductModel>;
+      final count = results[1] as int;
+
+      return Right(
+        ProductListResult(
+          products: models.map((m) => m.toEntity()).toList(),
+          totalProducts: count,
+        ),
+      );
     } on AuthException catch (e) {
       return Left(AuthFailure(message: e.message));
     } on ServerException catch (e) {

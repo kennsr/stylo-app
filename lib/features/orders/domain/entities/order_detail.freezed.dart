@@ -25,12 +25,12 @@ $OrderDetailCopyWith<OrderDetail> get copyWith => _$OrderDetailCopyWithImpl<Orde
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is OrderDetail&&(identical(other.id, id) || other.id == id)&&(identical(other.orderNumber, orderNumber) || other.orderNumber == orderNumber)&&(identical(other.status, status) || other.status == status)&&(identical(other.subtotal, subtotal) || other.subtotal == subtotal)&&(identical(other.shippingCost, shippingCost) || other.shippingCost == shippingCost)&&(identical(other.total, total) || other.total == total)&&(identical(other.paymentMethod, paymentMethod) || other.paymentMethod == paymentMethod)&&(identical(other.shippingCourier, shippingCourier) || other.shippingCourier == shippingCourier)&&(identical(other.shippingService, shippingService) || other.shippingService == shippingService)&&(identical(other.receiverName, receiverName) || other.receiverName == receiverName)&&(identical(other.address, address) || other.address == address)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&& DeepCollectionEquality().equals(other.items, items));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is OrderDetail&&(identical(other.id, id) || other.id == id)&&(identical(other.orderNumber, orderNumber) || other.orderNumber == orderNumber)&&(identical(other.status, status) || other.status == status)&&(identical(other.subtotal, subtotal) || other.subtotal == subtotal)&&(identical(other.shippingCost, shippingCost) || other.shippingCost == shippingCost)&&(identical(other.total, total) || other.total == total)&&(identical(other.paymentMethod, paymentMethod) || other.paymentMethod == paymentMethod)&&(identical(other.shippingCourier, shippingCourier) || other.shippingCourier == shippingCourier)&&(identical(other.shippingService, shippingService) || other.shippingService == shippingService)&&(identical(other.receiverName, receiverName) || other.receiverName == receiverName)&&(identical(other.address, address) || other.address == address)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&const DeepCollectionEquality().equals(other.items, items));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,orderNumber,status,subtotal,shippingCost,total,paymentMethod,shippingCourier,shippingService,receiverName,address,phone,createdAt, DeepCollectionEquality().hash(items));
+int get hashCode => Object.hash(runtimeType,id,orderNumber,status,subtotal,shippingCost,total,paymentMethod,shippingCourier,shippingService,receiverName,address,phone,createdAt,const DeepCollectionEquality().hash(items));
 
 @override
 String toString() {
@@ -253,12 +253,12 @@ _$OrderDetailCopyWith<_OrderDetail> get copyWith => __$OrderDetailCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _OrderDetail&&(identical(other.id, id) || other.id == id)&&(identical(other.orderNumber, orderNumber) || other.orderNumber == orderNumber)&&(identical(other.status, status) || other.status == status)&&(identical(other.subtotal, subtotal) || other.subtotal == subtotal)&&(identical(other.shippingCost, shippingCost) || other.shippingCost == shippingCost)&&(identical(other.total, total) || other.total == total)&&(identical(other.paymentMethod, paymentMethod) || other.paymentMethod == paymentMethod)&&(identical(other.shippingCourier, shippingCourier) || other.shippingCourier == shippingCourier)&&(identical(other.shippingService, shippingService) || other.shippingService == shippingService)&&(identical(other.receiverName, receiverName) || other.receiverName == receiverName)&&(identical(other.address, address) || other.address == address)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&& DeepCollectionEquality().equals(other._items, _items));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _OrderDetail&&(identical(other.id, id) || other.id == id)&&(identical(other.orderNumber, orderNumber) || other.orderNumber == orderNumber)&&(identical(other.status, status) || other.status == status)&&(identical(other.subtotal, subtotal) || other.subtotal == subtotal)&&(identical(other.shippingCost, shippingCost) || other.shippingCost == shippingCost)&&(identical(other.total, total) || other.total == total)&&(identical(other.paymentMethod, paymentMethod) || other.paymentMethod == paymentMethod)&&(identical(other.shippingCourier, shippingCourier) || other.shippingCourier == shippingCourier)&&(identical(other.shippingService, shippingService) || other.shippingService == shippingService)&&(identical(other.receiverName, receiverName) || other.receiverName == receiverName)&&(identical(other.address, address) || other.address == address)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&const DeepCollectionEquality().equals(other._items, _items));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,orderNumber,status,subtotal,shippingCost,total,paymentMethod,shippingCourier,shippingService,receiverName,address,phone,createdAt, DeepCollectionEquality().hash(_items));
+int get hashCode => Object.hash(runtimeType,id,orderNumber,status,subtotal,shippingCost,total,paymentMethod,shippingCourier,shippingService,receiverName,address,phone,createdAt,const DeepCollectionEquality().hash(_items));
 
 @override
 String toString() {

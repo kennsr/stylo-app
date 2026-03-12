@@ -80,7 +80,7 @@ class _HomePageState extends State<HomePage> {
                    SizedBox(height: 24),
                   _buildSectionHeader(
                     'Rekomendasi',
-                    onSeeAll: () => context.go('/products'),
+                    onSeeAll: () => context.push('/products'),
                   ),
                    SizedBox(height: 12),
                   isLoading

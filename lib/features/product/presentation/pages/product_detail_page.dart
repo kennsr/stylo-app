@@ -8,6 +8,9 @@ import 'package:shimmer/shimmer.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../../../features/auth/presentation/bloc/auth_state.dart';
+import '../../../../features/cart/domain/entities/cart_item.dart';
+import '../../../../features/cart/presentation/bloc/cart_bloc.dart';
+import '../../../../features/cart/presentation/bloc/cart_event.dart';
 import '../../domain/entities/product.dart';
 import '../bloc/product_detail_bloc.dart';
 import '../bloc/product_detail_event.dart';
@@ -65,8 +68,41 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       bottomNavigationBar: BlocBuilder<ProductDetailBloc, ProductDetailState>(
         builder: (context, state) {
           if (state is ProductDetailLoaded) {
+            // Capture product outside the lambda so Dart's flow analysis
+            // promotes the type here (closures don't benefit from promotion).
+            final product = state.product;
             return AddToCartBar(
               onAddToCart: () => _requireAuth(() {
+                // Dispatch the actual cart add event to the global CartBloc.
+                context.read<CartBloc>().add(
+                  CartAddItem(
+                    cartItem: CartItem(
+                      // Temp ID; the server will assign the canonical ID on
+                      // the next full cart fetch (in production).
+                      id: 'temp_${product.id}_'
+                          '${DateTime.now().millisecondsSinceEpoch}',
+                      productId: product.id,
+                      productName: product.name,
+                      productImage: product.images.isNotEmpty
+                          ? product.images.first
+                          : '',
+                      // Use the effective price (discounted if applicable).
+                      price: product.discountPrice ?? product.price,
+                      quantity: 1,
+                      // Fall back to the first variant when the user hasn't
+                      // explicitly selected a size/color yet.
+                      size: _selectedSize ??
+                          (product.variants.isNotEmpty
+                              ? product.variants.first.size
+                              : ''),
+                      color: _selectedColor ??
+                          (product.variants.isNotEmpty
+                              ? product.variants.first.color
+                              : ''),
+                      discountPrice: product.discountPrice,
+                    ),
+                  ),
+                );
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
@@ -83,7 +119,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               }),
             );
           }
-          return  SizedBox.shrink();
+          return const SizedBox.shrink();
         },
       ),
       body: BlocBuilder<ProductDetailBloc, ProductDetailState>(

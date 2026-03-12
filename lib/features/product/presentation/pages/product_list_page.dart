@@ -43,10 +43,8 @@ class _ProductListPageState extends State<ProductListPage> {
   void _fetchProducts({String? category}) {
     final cat = category ?? _selectedCategory;
     context.read<ProductListBloc>().add(
-          ProductListFetch(
-            category: cat == 'Semua' ? null : cat,
-          ),
-        );
+      ProductListFetch(category: cat == 'Semua' ? null : cat),
+    );
   }
 
   void _onScroll() {
@@ -66,10 +64,12 @@ class _ProductListPageState extends State<ProductListPage> {
     final currentSort = state is ProductListLoaded
         ? state.currentSort
         : ProductSortOption.terbaru;
-    final currentMin =
-        state is ProductListLoaded ? state.currentMinPrice : null;
-    final currentMax =
-        state is ProductListLoaded ? state.currentMaxPrice : null;
+    final currentMin = state is ProductListLoaded
+        ? state.currentMinPrice
+        : null;
+    final currentMax = state is ProductListLoaded
+        ? state.currentMaxPrice
+        : null;
 
     showModalBottomSheet(
       context: context,
@@ -81,16 +81,11 @@ class _ProductListPageState extends State<ProductListPage> {
         currentMaxPrice: currentMax,
         onApply: (sort, min, max) {
           context.read<ProductListBloc>().add(
-                ProductListApplyFilter(
-                  sort: sort,
-                  minPrice: min,
-                  maxPrice: max,
-                ),
-              );
+            ProductListApplyFilter(sort: sort, minPrice: min, maxPrice: max),
+          );
           setState(() {
-            _hasActiveFilter = sort != ProductSortOption.terbaru ||
-                min != null ||
-                max != null;
+            _hasActiveFilter =
+                sort != ProductSortOption.terbaru || min != null || max != null;
           });
           Navigator.pop(context);
         },
@@ -137,8 +132,9 @@ class _ProductListPageState extends State<ProductListPage> {
               builder: (context, state) {
                 final isActive =
                     state is ProductListLoaded && state.hasActiveFilter;
-                final activeCount =
-                    state is ProductListLoaded ? state.activeFilterCount : 0;
+                final activeCount = state is ProductListLoaded
+                    ? state.activeFilterCount
+                    : 0;
                 return Stack(
                   clipBehavior: Clip.none,
                   children: [
@@ -181,10 +177,7 @@ class _ProductListPageState extends State<ProductListPage> {
           ],
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(1),
-            child: Container(
-              height: 1,
-              color: context.dividerColor,
-            ),
+            child: Container(height: 1, color: context.dividerColor),
           ),
         ),
         body: Column(
@@ -242,8 +235,7 @@ class _ProductListPageState extends State<ProductListPage> {
                       vertical: 7,
                     ),
                     decoration: BoxDecoration(
-                      color:
-                          isSelected ? AppColors.accent : Colors.transparent,
+                      color: isSelected ? AppColors.accent : Colors.transparent,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: isSelected
@@ -283,7 +275,7 @@ class _ProductListPageState extends State<ProductListPage> {
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
           sliver: SliverToBoxAdapter(
             child: Text(
-              '${state.products.length} produk ditemukan',
+              '${state.totalProducts} produk ditemukan',
               style: GoogleFonts.poppins(
                 fontSize: 12,
                 color: context.secondaryTextColor,
@@ -300,16 +292,12 @@ class _ProductListPageState extends State<ProductListPage> {
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
             ),
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                if (index >= state.products.length) {
-                  return _buildShimmerCard();
-                }
-                return ProductCard(product: state.products[index]);
-              },
-              childCount:
-                  state.products.length + (state.hasMore ? 2 : 0),
-            ),
+            delegate: SliverChildBuilderDelegate((context, index) {
+              if (index >= state.products.length) {
+                return _buildShimmerCard();
+              }
+              return ProductCard(product: state.products[index]);
+            }, childCount: state.products.length + (state.hasMore ? 2 : 0)),
           ),
         ),
       ],

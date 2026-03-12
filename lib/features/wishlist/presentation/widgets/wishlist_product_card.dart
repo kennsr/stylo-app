@@ -34,7 +34,7 @@ class WishlistProductCard extends StatelessWidget {
         : null;
 
     return GestureDetector(
-      onTap: () => context.go('/products/${product.id}'),
+      onTap: () => context.push('/products/${product.id}'),
       child: Container(
         decoration: BoxDecoration(
           color: context.backgroundColor,

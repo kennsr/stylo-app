@@ -1,10 +1,11 @@
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/either.dart';
 import '../entities/product.dart';
+import '../entities/product_list_result.dart';
 import '../entities/review.dart';
 
 abstract class ProductRepository {
-  Future<Either<Failure, List<Product>>> getProducts({
+  Future<Either<Failure, ProductListResult>> getProducts({
     String? category,
     String? search,
     int page = 1,

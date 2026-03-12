@@ -125,7 +125,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     MenuTile(
                       icon: Icons.accessibility_new_outlined,
                       title: 'Fit Profile',
-                      onTap: () => context.go('/try-on/fit-profile'),
+                      onTap: () => context.push('/fit-profile'),
                     ),
                   ],
                 ),

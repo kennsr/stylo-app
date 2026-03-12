@@ -23,6 +23,7 @@ class ProductListLoading extends ProductListState {
 class ProductListLoaded extends ProductListState {
   final List<Product> products;
   final List<Product> allProducts;
+  final int totalProducts;
   final bool hasMore;
   final int currentPage;
   final ProductSortOption currentSort;
@@ -44,6 +45,7 @@ class ProductListLoaded extends ProductListState {
   const ProductListLoaded({
     required this.products,
     required this.allProducts,
+    required this.totalProducts,
     this.hasMore = false,
     this.currentPage = 1,
     this.currentSort = ProductSortOption.terbaru,
@@ -53,14 +55,37 @@ class ProductListLoaded extends ProductListState {
 
   @override
   List<Object?> get props => [
-        products,
-        allProducts,
-        hasMore,
-        currentPage,
-        currentSort,
-        currentMinPrice,
-        currentMaxPrice,
-      ];
+    products,
+    allProducts,
+    totalProducts,
+    hasMore,
+    currentPage,
+    currentSort,
+    currentMinPrice,
+    currentMaxPrice,
+  ];
+
+  ProductListLoaded copyWith({
+    List<Product>? products,
+    List<Product>? allProducts,
+    int? totalProducts,
+    bool? hasMore,
+    int? currentPage,
+    ProductSortOption? currentSort,
+    double? currentMinPrice,
+    double? currentMaxPrice,
+  }) {
+    return ProductListLoaded(
+      products: products ?? this.products,
+      allProducts: allProducts ?? this.allProducts,
+      totalProducts: totalProducts ?? this.totalProducts,
+      hasMore: hasMore ?? this.hasMore,
+      currentPage: currentPage ?? this.currentPage,
+      currentSort: currentSort ?? this.currentSort,
+      currentMinPrice: currentMinPrice ?? this.currentMinPrice,
+      currentMaxPrice: currentMaxPrice ?? this.currentMaxPrice,
+    );
+  }
 }
 
 class ProductListError extends ProductListState {

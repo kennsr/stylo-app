@@ -84,8 +84,11 @@ class _StylePreferenceChipsState extends State<StylePreferenceChips> {
                 },
                 selectedColor: AppColors.accent,
                 checkmarkColor: Colors.white,
+                // Explicit text color so it stays readable in both light and
+                // dark mode — Material 3's default can blend with the chip
+                // background in light mode.
                 labelStyle: TextStyle(
-                  color: isSelected ? Colors.white : null,
+                  color: isSelected ? Colors.white : context.primaryTextColor,
                   fontWeight:
                       isSelected ? FontWeight.w600 : FontWeight.normal,
                 ),

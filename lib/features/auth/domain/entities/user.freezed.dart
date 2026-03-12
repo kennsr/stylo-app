@@ -25,12 +25,12 @@ $UserCopyWith<User> get copyWith => _$UserCopyWithImpl<User>(this as User, _$ide
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is User&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.name, name) || other.name == name)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&& DeepCollectionEquality().equals(other.stylePreferences, stylePreferences));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is User&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.name, name) || other.name == name)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&const DeepCollectionEquality().equals(other.stylePreferences, stylePreferences));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,email,name,phone,avatarUrl, DeepCollectionEquality().hash(stylePreferences));
+int get hashCode => Object.hash(runtimeType,id,email,name,phone,avatarUrl,const DeepCollectionEquality().hash(stylePreferences));
 
 @override
 String toString() {
@@ -237,12 +237,12 @@ _$UserCopyWith<_User> get copyWith => __$UserCopyWithImpl<_User>(this, _$identit
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _User&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.name, name) || other.name == name)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&& DeepCollectionEquality().equals(other._stylePreferences, _stylePreferences));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _User&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.name, name) || other.name == name)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&const DeepCollectionEquality().equals(other._stylePreferences, _stylePreferences));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,email,name,phone,avatarUrl, DeepCollectionEquality().hash(_stylePreferences));
+int get hashCode => Object.hash(runtimeType,id,email,name,phone,avatarUrl,const DeepCollectionEquality().hash(_stylePreferences));
 
 @override
 String toString() {

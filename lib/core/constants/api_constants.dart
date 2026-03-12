@@ -6,7 +6,7 @@ class ApiConstants {
       case Environment.production:
         return 'https://api.stylo.id/v1';
       case Environment.staging:
-        return 'https://staging-api.stylo.id/v1';
+        return 'https://stagingstyloserver-ug3gmrkg.b4a.run/v1';
       case Environment.dev:
         return 'https://04d3-182-253-251-196.ngrok-free.app/v1';
       case Environment.mock:
@@ -25,6 +25,7 @@ class ApiConstants {
 
   // Products
   static const String products = '/products';
+  static const String productCount = '/products/count';
   static const String categories = '/products/categories';
 
   // Try-On

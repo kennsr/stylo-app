@@ -25,12 +25,12 @@ $ProductCopyWith<Product> get copyWith => _$ProductCopyWithImpl<Product>(this as
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Product&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.price, price) || other.price == price)&&(identical(other.discountPrice, discountPrice) || other.discountPrice == discountPrice)&&(identical(other.category, category) || other.category == category)&& DeepCollectionEquality().equals(other.images, images)&& DeepCollectionEquality().equals(other.variants, variants)&&(identical(other.rating, rating) || other.rating == rating)&&(identical(other.reviewCount, reviewCount) || other.reviewCount == reviewCount)&&(identical(other.stock, stock) || other.stock == stock)&&(identical(other.isFeatured, isFeatured) || other.isFeatured == isFeatured)&&(identical(other.hasAiTryOn, hasAiTryOn) || other.hasAiTryOn == hasAiTryOn));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Product&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.price, price) || other.price == price)&&(identical(other.discountPrice, discountPrice) || other.discountPrice == discountPrice)&&(identical(other.category, category) || other.category == category)&&const DeepCollectionEquality().equals(other.images, images)&&const DeepCollectionEquality().equals(other.variants, variants)&&(identical(other.rating, rating) || other.rating == rating)&&(identical(other.reviewCount, reviewCount) || other.reviewCount == reviewCount)&&(identical(other.stock, stock) || other.stock == stock)&&(identical(other.isFeatured, isFeatured) || other.isFeatured == isFeatured)&&(identical(other.hasAiTryOn, hasAiTryOn) || other.hasAiTryOn == hasAiTryOn));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,name,description,price,discountPrice,category, DeepCollectionEquality().hash(images), DeepCollectionEquality().hash(variants),rating,reviewCount,stock,isFeatured,hasAiTryOn);
+int get hashCode => Object.hash(runtimeType,id,name,description,price,discountPrice,category,const DeepCollectionEquality().hash(images),const DeepCollectionEquality().hash(variants),rating,reviewCount,stock,isFeatured,hasAiTryOn);
 
 @override
 String toString() {
@@ -257,12 +257,12 @@ _$ProductCopyWith<_Product> get copyWith => __$ProductCopyWithImpl<_Product>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Product&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.price, price) || other.price == price)&&(identical(other.discountPrice, discountPrice) || other.discountPrice == discountPrice)&&(identical(other.category, category) || other.category == category)&& DeepCollectionEquality().equals(other._images, _images)&& DeepCollectionEquality().equals(other._variants, _variants)&&(identical(other.rating, rating) || other.rating == rating)&&(identical(other.reviewCount, reviewCount) || other.reviewCount == reviewCount)&&(identical(other.stock, stock) || other.stock == stock)&&(identical(other.isFeatured, isFeatured) || other.isFeatured == isFeatured)&&(identical(other.hasAiTryOn, hasAiTryOn) || other.hasAiTryOn == hasAiTryOn));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Product&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.price, price) || other.price == price)&&(identical(other.discountPrice, discountPrice) || other.discountPrice == discountPrice)&&(identical(other.category, category) || other.category == category)&&const DeepCollectionEquality().equals(other._images, _images)&&const DeepCollectionEquality().equals(other._variants, _variants)&&(identical(other.rating, rating) || other.rating == rating)&&(identical(other.reviewCount, reviewCount) || other.reviewCount == reviewCount)&&(identical(other.stock, stock) || other.stock == stock)&&(identical(other.isFeatured, isFeatured) || other.isFeatured == isFeatured)&&(identical(other.hasAiTryOn, hasAiTryOn) || other.hasAiTryOn == hasAiTryOn));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,name,description,price,discountPrice,category, DeepCollectionEquality().hash(_images), DeepCollectionEquality().hash(_variants),rating,reviewCount,stock,isFeatured,hasAiTryOn);
+int get hashCode => Object.hash(runtimeType,id,name,description,price,discountPrice,category,const DeepCollectionEquality().hash(_images),const DeepCollectionEquality().hash(_variants),rating,reviewCount,stock,isFeatured,hasAiTryOn);
 
 @override
 String toString() {

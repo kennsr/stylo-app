@@ -15,13 +15,13 @@ class ApiClient {
 
   Map<String, String> get _headers {
     // Try new session token first, then fall back to legacy token
-    final token = prefs.getString('stylo_session_token') 
-               ?? prefs.getString(AppConstants.tokenKey);
+    final token =
+        prefs.getString('stylo_session_token') ??
+        prefs.getString(AppConstants.tokenKey);
     return {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      if (token != null && token.isNotEmpty)
-        'Authorization': 'Bearer $token',
+      if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
     };
   }
 
@@ -30,7 +30,7 @@ class ApiClient {
     return Uri(
       scheme: base.scheme,
       host: base.host,
-      port: base.port,          // ← preserve port (e.g. 8080 for localhost)
+      port: base.port, // ← preserve port (e.g. 8080 for localhost)
       path: base.path + path,
       queryParameters: queryParams,
     );
@@ -42,7 +42,11 @@ class ApiClient {
   }) async {
     if (EnvConfig.useMock) {
       await Future.delayed(const Duration(milliseconds: 500));
-      return MockApiData.getMockResponse(path, method: 'GET');
+      return MockApiData.getMockResponse(
+        path,
+        method: 'GET',
+        queryParams: queryParams,
+      );
     }
     try {
       final response = await httpClient
@@ -94,11 +98,7 @@ class ApiClient {
     }
     try {
       final response = await httpClient
-          .put(
-            _buildUri(path),
-            headers: _headers,
-            body: jsonEncode(body ?? {}),
-          )
+          .put(_buildUri(path), headers: _headers, body: jsonEncode(body ?? {}))
           .timeout(ApiConstants.receiveTimeout);
       return _handleResponse(response);
     } on ServerException {

@@ -19,12 +19,6 @@ class CartPage extends StatefulWidget {
 
 class _CartPageState extends State<CartPage> {
   @override
-  void initState() {
-    super.initState();
-    context.read<CartBloc>().add( CartFetch());
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: context.surfaceColor,

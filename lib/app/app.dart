@@ -140,7 +140,7 @@ class _StyloAppState extends State<StyloApp> {
       providers: [
         BlocProvider<AuthBloc>.value(value: _authBloc),
         BlocProvider<CartBloc>(
-          create: (_) => di.sl<CartBloc>()..add(const CartFetch()),
+          create: (_) => di.sl<CartBloc>(),
         ),
         BlocProvider<WishlistBloc>(
           create: (_) => di.sl<WishlistBloc>()..add(const WishlistLoad()),
@@ -274,6 +274,20 @@ class _StyloAppState extends State<StyloApp> {
           ),
         ),
 
+        // ── Fit Profile (outside shell — no bottom nav, back returns to caller)
+        // Accessed via context.push('/fit-profile') from profile page so that
+        // pressing back pops back to the profile page, not /try-on.
+        GoRoute(
+          path: '/fit-profile',
+          pageBuilder: (context, state) => _fadePage(
+            state,
+            BlocProvider(
+              create: (_) => di.sl<AiTryOnBloc>(),
+              child: const FitProfilePage(),
+            ),
+          ),
+        ),
+
         // ── Checkout (outside shell — no bottom nav) ──────────────────────────
         GoRoute(
           path: '/checkout',
@@ -351,13 +365,6 @@ class _StyloAppState extends State<StyloApp> {
                       ),
                     ),
                   ),
-                  routes: [
-                    GoRoute(
-                      path: 'fit-profile',
-                      pageBuilder: (context, state) =>
-                          _fadePage(state, const FitProfilePage()),
-                    ),
-                  ],
                 ),
                 GoRoute(
                   path: '/notifications',
@@ -480,6 +487,7 @@ class _StyloAppState extends State<StyloApp> {
       '/cart',
       '/checkout',
       '/try-on',
+      '/fit-profile',
       '/orders',
       '/profile',
       '/onboarding',

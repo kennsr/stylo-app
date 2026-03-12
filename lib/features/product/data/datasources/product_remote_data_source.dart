@@ -1,5 +1,6 @@
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/network/api_client.dart';
+import '../../../../core/constants/api_constants.dart';
 import '../models/product_model.dart';
 import '../models/review_model.dart';
 
@@ -10,6 +11,8 @@ abstract class ProductRemoteDataSource {
     int page = 1,
     int pageSize = 20,
   });
+
+  Future<int> getProductCount({String? category, String? search});
 
   Future<ProductModel> getProductDetail(String productId);
 
@@ -41,14 +44,11 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
       queryParams['search'] = search;
     }
 
-    final response = await apiClient.get(
-      '/products',
-      queryParams: queryParams,
-    );
+    final response = await apiClient.get('/products', queryParams: queryParams);
 
     final data = response['data'];
     if (data == null) {
-      throw  ServerException(message: 'Data tidak ditemukan');
+      throw ServerException(message: 'Data tidak ditemukan');
     }
 
     final list = data as List<dynamic>;
@@ -58,12 +58,35 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
   }
 
   @override
+  Future<int> getProductCount({String? category, String? search}) async {
+    final queryParams = <String, String>{};
+    if (category != null && category != 'Semua') {
+      queryParams['category'] = category;
+    }
+    if (search != null && search.isNotEmpty) {
+      queryParams['search'] = search;
+    }
+
+    final response = await apiClient.get(
+      ApiConstants.productCount,
+      queryParams: queryParams,
+    );
+
+    final data = response['data'];
+    if (data == null || data['total'] == null) {
+      return 0;
+    }
+
+    return data['total'] as int;
+  }
+
+  @override
   Future<ProductModel> getProductDetail(String productId) async {
     final response = await apiClient.get('/products/$productId');
 
     final data = response['data'];
     if (data == null) {
-      throw  ServerException(message: 'Produk tidak ditemukan');
+      throw ServerException(message: 'Produk tidak ditemukan');
     }
 
     return ProductModel.fromJson(data as Map<String, dynamic>);
@@ -78,7 +101,7 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
 
     final data = response['data'];
     if (data == null) {
-      throw  ServerException(message: 'Data tidak ditemukan');
+      throw ServerException(message: 'Data tidak ditemukan');
     }
 
     final list = data as List<dynamic>;
@@ -93,7 +116,7 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
 
     final data = response['data'];
     if (data == null) {
-      throw  ServerException(message: 'Data tidak ditemukan');
+      throw ServerException(message: 'Data tidak ditemukan');
     }
 
     final list = data as List<dynamic>;

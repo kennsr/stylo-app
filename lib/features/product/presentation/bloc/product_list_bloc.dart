@@ -15,7 +15,7 @@ class ProductListBloc extends Bloc<ProductListEvent, ProductListState> {
   double? _currentMaxPrice;
 
   ProductListBloc({required this.getProductsUseCase})
-      : super(const ProductListInitial()) {
+    : super(const ProductListInitial()) {
     on<ProductListFetch>(_onFetch);
     on<ProductListLoadMore>(_onLoadMore);
     on<ProductListApplyFilter>(_onApplyFilter);
@@ -41,28 +41,28 @@ class ProductListBloc extends Bloc<ProductListEvent, ProductListState> {
       ),
     );
 
-    result.fold(
-      (failure) => emit(ProductListError(message: failure.message)),
-      (products) {
-        final filtered = _applySortAndFilter(
-          products,
-          _currentSort,
-          _currentMinPrice,
-          _currentMaxPrice,
-        );
-        emit(
-          ProductListLoaded(
-            products: filtered,
-            allProducts: products,
-            hasMore: products.length >= AppConstants.defaultPageSize,
-            currentPage: 1,
-            currentSort: _currentSort,
-            currentMinPrice: _currentMinPrice,
-            currentMaxPrice: _currentMaxPrice,
-          ),
-        );
-      },
-    );
+    result.fold((failure) => emit(ProductListError(message: failure.message)), (
+      result,
+    ) {
+      final filtered = _applySortAndFilter(
+        result.products,
+        _currentSort,
+        _currentMinPrice,
+        _currentMaxPrice,
+      );
+      emit(
+        ProductListLoaded(
+          products: filtered,
+          allProducts: result.products,
+          totalProducts: result.totalProducts,
+          hasMore: result.products.length >= AppConstants.defaultPageSize,
+          currentPage: 1,
+          currentSort: _currentSort,
+          currentMinPrice: _currentMinPrice,
+          currentMaxPrice: _currentMaxPrice,
+        ),
+      );
+    });
   }
 
   Future<void> _onLoadMore(
@@ -83,29 +83,29 @@ class ProductListBloc extends Bloc<ProductListEvent, ProductListState> {
       ),
     );
 
-    result.fold(
-      (failure) => emit(ProductListError(message: failure.message)),
-      (newProducts) {
-        final combinedAll = [...currentState.allProducts, ...newProducts];
-        final filtered = _applySortAndFilter(
-          combinedAll,
-          _currentSort,
-          _currentMinPrice,
-          _currentMaxPrice,
-        );
-        emit(
-          ProductListLoaded(
-            products: filtered,
-            allProducts: combinedAll,
-            hasMore: newProducts.length >= AppConstants.defaultPageSize,
-            currentPage: nextPage,
-            currentSort: _currentSort,
-            currentMinPrice: _currentMinPrice,
-            currentMaxPrice: _currentMaxPrice,
-          ),
-        );
-      },
-    );
+    result.fold((failure) => emit(ProductListError(message: failure.message)), (
+      result,
+    ) {
+      final combinedAll = [...currentState.allProducts, ...result.products];
+      final filtered = _applySortAndFilter(
+        combinedAll,
+        _currentSort,
+        _currentMinPrice,
+        _currentMaxPrice,
+      );
+      emit(
+        currentState.copyWith(
+          products: filtered,
+          allProducts: combinedAll,
+          // Only update total if we got a valid one (on first page or if backend returns it)
+          totalProducts: result.totalProducts != -1
+              ? result.totalProducts
+              : currentState.totalProducts,
+          hasMore: result.products.length >= AppConstants.defaultPageSize,
+          currentPage: nextPage,
+        ),
+      );
+    });
   }
 
   void _onApplyFilter(
@@ -127,11 +127,8 @@ class ProductListBloc extends Bloc<ProductListEvent, ProductListState> {
     );
 
     emit(
-      ProductListLoaded(
+      currentState.copyWith(
         products: filtered,
-        allProducts: currentState.allProducts,
-        hasMore: currentState.hasMore,
-        currentPage: currentState.currentPage,
         currentSort: _currentSort,
         currentMinPrice: _currentMinPrice,
         currentMaxPrice: _currentMaxPrice,
@@ -162,11 +159,17 @@ class ProductListBloc extends Bloc<ProductListEvent, ProductListState> {
     // Sort
     switch (sort) {
       case ProductSortOption.hargaTerendah:
-        result.sort((a, b) =>
-            (a.discountPrice ?? a.price).compareTo(b.discountPrice ?? b.price));
+        result.sort(
+          (a, b) => (a.discountPrice ?? a.price).compareTo(
+            b.discountPrice ?? b.price,
+          ),
+        );
       case ProductSortOption.hargaTertinggi:
-        result.sort((a, b) =>
-            (b.discountPrice ?? b.price).compareTo(a.discountPrice ?? a.price));
+        result.sort(
+          (a, b) => (b.discountPrice ?? b.price).compareTo(
+            a.discountPrice ?? a.price,
+          ),
+        );
       case ProductSortOption.ratingTertinggi:
         result.sort((a, b) => b.rating.compareTo(a.rating));
       case ProductSortOption.terbaru:

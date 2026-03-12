@@ -1537,6 +1537,7 @@ class MockApiData {
     String path, {
     String method = 'GET',
     Map<String, dynamic>? body,
+    Map<String, String>? queryParams,
   }) {
     // ---- Auth ----------------------------------------------------------------
     if (path == ApiConstants.login ||
@@ -1733,7 +1734,58 @@ class MockApiData {
 
     // ---- Products List -------------------------------------------------------
     if (path == ApiConstants.products) {
-      return {'message': 'Success', 'data': _products};
+      final category = queryParams?['category'];
+      final search = queryParams?['search'];
+
+      var filtered = _products;
+      if (category != null && category != 'Semua') {
+        filtered = filtered.where((p) => p['category'] == category).toList();
+      }
+      if (search != null && search.isNotEmpty) {
+        final query = search.toLowerCase();
+        filtered = filtered
+            .where(
+              (p) =>
+                  p['name'].toString().toLowerCase().contains(query) ||
+                  p['description'].toString().toLowerCase().contains(query),
+            )
+            .toList();
+      }
+
+      return {'message': 'Success', 'data': filtered};
+    }
+
+    // ---- Products Count ------------------------------------------------------
+    if (path == ApiConstants.productCount) {
+      final category = queryParams?['category'];
+      final search = queryParams?['search'];
+
+      var filtered = _products;
+      if (category != null && category != 'Semua') {
+        filtered = filtered.where((p) => p['category'] == category).toList();
+      }
+      if (search != null && search.isNotEmpty) {
+        final query = search.toLowerCase();
+        filtered = filtered
+            .where(
+              (p) =>
+                  p['name'].toString().toLowerCase().contains(query) ||
+                  p['description'].toString().toLowerCase().contains(query),
+            )
+            .toList();
+      }
+
+      // For debugging/demo, let's assume if no filter, total is always 100
+      // but if we have mock data, use its length.
+      // User mentioned 100 items total, so let's mock that if unfiltered.
+      final total = (category == null && search == null)
+          ? 100
+          : filtered.length;
+
+      return {
+        'message': 'Success',
+        'data': {'total': total},
+      };
     }
 
     // ---- Try-On --------------------------------------------------------------
