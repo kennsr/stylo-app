@@ -15,7 +15,11 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ProductModel {
 
- String get id; String get name; String get description; double get price;@JsonKey(name: 'discount_price') double? get discountPrice; String get category; List<String> get images; List<ProductVariantModel> get variants; double get rating;@JsonKey(name: 'review_count') int get reviewCount; int get stock;@JsonKey(name: 'is_featured') bool get isFeatured;@JsonKey(name: 'has_ai_try_on') bool get hasAiTryOn;
+ String get id; String get name;// Give safe defaults to fields a real server may omit or return as null.
+// Without @Default, a missing/null JSON field throws TypeError inside
+// fromJson, which propagates past the repository's specific catch clauses
+// and leaves the ProductDetailBloc stuck at ProductDetailLoading forever.
+ String get description; double get price;@JsonKey(name: 'discount_price') double? get discountPrice; String get category; List<String> get images; List<ProductVariantModel> get variants; double get rating;@JsonKey(name: 'review_count') int get reviewCount; int get stock;@JsonKey(name: 'is_featured') bool get isFeatured;@JsonKey(name: 'has_ai_try_on') bool get hasAiTryOn;
 /// Create a copy of ProductModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,12 +32,12 @@ $ProductModelCopyWith<ProductModel> get copyWith => _$ProductModelCopyWithImpl<P
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProductModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.price, price) || other.price == price)&&(identical(other.discountPrice, discountPrice) || other.discountPrice == discountPrice)&&(identical(other.category, category) || other.category == category)&& DeepCollectionEquality().equals(other.images, images)&& DeepCollectionEquality().equals(other.variants, variants)&&(identical(other.rating, rating) || other.rating == rating)&&(identical(other.reviewCount, reviewCount) || other.reviewCount == reviewCount)&&(identical(other.stock, stock) || other.stock == stock)&&(identical(other.isFeatured, isFeatured) || other.isFeatured == isFeatured)&&(identical(other.hasAiTryOn, hasAiTryOn) || other.hasAiTryOn == hasAiTryOn));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProductModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.price, price) || other.price == price)&&(identical(other.discountPrice, discountPrice) || other.discountPrice == discountPrice)&&(identical(other.category, category) || other.category == category)&&const DeepCollectionEquality().equals(other.images, images)&&const DeepCollectionEquality().equals(other.variants, variants)&&(identical(other.rating, rating) || other.rating == rating)&&(identical(other.reviewCount, reviewCount) || other.reviewCount == reviewCount)&&(identical(other.stock, stock) || other.stock == stock)&&(identical(other.isFeatured, isFeatured) || other.isFeatured == isFeatured)&&(identical(other.hasAiTryOn, hasAiTryOn) || other.hasAiTryOn == hasAiTryOn));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,description,price,discountPrice,category, DeepCollectionEquality().hash(images), DeepCollectionEquality().hash(variants),rating,reviewCount,stock,isFeatured,hasAiTryOn);
+int get hashCode => Object.hash(runtimeType,id,name,description,price,discountPrice,category,const DeepCollectionEquality().hash(images),const DeepCollectionEquality().hash(variants),rating,reviewCount,stock,isFeatured,hasAiTryOn);
 
 @override
 String toString() {
@@ -221,32 +225,36 @@ return $default(_that.id,_that.name,_that.description,_that.price,_that.discount
 @JsonSerializable()
 
 class _ProductModel implements ProductModel {
-  const _ProductModel({required this.id, required this.name, required this.description, required this.price, @JsonKey(name: 'discount_price') this.discountPrice, required this.category, required final  List<String> images, required final  List<ProductVariantModel> variants, required this.rating, @JsonKey(name: 'review_count') required this.reviewCount, required this.stock, @JsonKey(name: 'is_featured') this.isFeatured = false, @JsonKey(name: 'has_ai_try_on') this.hasAiTryOn = false}): _images = images,_variants = variants;
+  const _ProductModel({required this.id, required this.name, this.description = '', required this.price, @JsonKey(name: 'discount_price') this.discountPrice, this.category = '', final  List<String> images = const [], final  List<ProductVariantModel> variants = const [], this.rating = 0.0, @JsonKey(name: 'review_count') this.reviewCount = 0, this.stock = 0, @JsonKey(name: 'is_featured') this.isFeatured = false, @JsonKey(name: 'has_ai_try_on') this.hasAiTryOn = false}): _images = images,_variants = variants;
   factory _ProductModel.fromJson(Map<String, dynamic> json) => _$ProductModelFromJson(json);
 
 @override final  String id;
 @override final  String name;
-@override final  String description;
+// Give safe defaults to fields a real server may omit or return as null.
+// Without @Default, a missing/null JSON field throws TypeError inside
+// fromJson, which propagates past the repository's specific catch clauses
+// and leaves the ProductDetailBloc stuck at ProductDetailLoading forever.
+@override@JsonKey() final  String description;
 @override final  double price;
 @override@JsonKey(name: 'discount_price') final  double? discountPrice;
-@override final  String category;
+@override@JsonKey() final  String category;
  final  List<String> _images;
-@override List<String> get images {
+@override@JsonKey() List<String> get images {
   if (_images is EqualUnmodifiableListView) return _images;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_images);
 }
 
  final  List<ProductVariantModel> _variants;
-@override List<ProductVariantModel> get variants {
+@override@JsonKey() List<ProductVariantModel> get variants {
   if (_variants is EqualUnmodifiableListView) return _variants;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_variants);
 }
 
-@override final  double rating;
+@override@JsonKey() final  double rating;
 @override@JsonKey(name: 'review_count') final  int reviewCount;
-@override final  int stock;
+@override@JsonKey() final  int stock;
 @override@JsonKey(name: 'is_featured') final  bool isFeatured;
 @override@JsonKey(name: 'has_ai_try_on') final  bool hasAiTryOn;
 
@@ -263,12 +271,12 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProductModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.price, price) || other.price == price)&&(identical(other.discountPrice, discountPrice) || other.discountPrice == discountPrice)&&(identical(other.category, category) || other.category == category)&& DeepCollectionEquality().equals(other._images, _images)&& DeepCollectionEquality().equals(other._variants, _variants)&&(identical(other.rating, rating) || other.rating == rating)&&(identical(other.reviewCount, reviewCount) || other.reviewCount == reviewCount)&&(identical(other.stock, stock) || other.stock == stock)&&(identical(other.isFeatured, isFeatured) || other.isFeatured == isFeatured)&&(identical(other.hasAiTryOn, hasAiTryOn) || other.hasAiTryOn == hasAiTryOn));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProductModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.price, price) || other.price == price)&&(identical(other.discountPrice, discountPrice) || other.discountPrice == discountPrice)&&(identical(other.category, category) || other.category == category)&&const DeepCollectionEquality().equals(other._images, _images)&&const DeepCollectionEquality().equals(other._variants, _variants)&&(identical(other.rating, rating) || other.rating == rating)&&(identical(other.reviewCount, reviewCount) || other.reviewCount == reviewCount)&&(identical(other.stock, stock) || other.stock == stock)&&(identical(other.isFeatured, isFeatured) || other.isFeatured == isFeatured)&&(identical(other.hasAiTryOn, hasAiTryOn) || other.hasAiTryOn == hasAiTryOn));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,description,price,discountPrice,category, DeepCollectionEquality().hash(_images), DeepCollectionEquality().hash(_variants),rating,reviewCount,stock,isFeatured,hasAiTryOn);
+int get hashCode => Object.hash(runtimeType,id,name,description,price,discountPrice,category,const DeepCollectionEquality().hash(_images),const DeepCollectionEquality().hash(_variants),rating,reviewCount,stock,isFeatured,hasAiTryOn);
 
 @override
 String toString() {

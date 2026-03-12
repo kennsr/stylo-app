@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/utils/usecase.dart';
 import '../../domain/usecases/generate_try_on_usecase.dart';
+import '../../domain/usecases/get_avatars_usecase.dart';
 import '../../domain/usecases/get_try_on_history_usecase.dart';
 import 'ai_try_on_event.dart';
 import 'ai_try_on_state.dart';
@@ -8,12 +9,15 @@ import 'ai_try_on_state.dart';
 class AiTryOnBloc extends Bloc<AiTryOnEvent, AiTryOnState> {
   final GenerateTryOnUseCase generateTryOnUseCase;
   final GetTryOnHistoryUseCase getTryOnHistoryUseCase;
+  final GetAvatarsUseCase getAvatarsUseCase;
 
   AiTryOnBloc({
     required this.generateTryOnUseCase,
     required this.getTryOnHistoryUseCase,
-  }) : super( AiTryOnInitial()) {
+    required this.getAvatarsUseCase,
+  }) : super(const AiTryOnInitial()) {
     on<AiTryOnGenerate>(_onGenerate);
+    on<AiTryOnLoadAvatars>(_onLoadAvatars);
     on<AiTryOnLoadHistory>(_onLoadHistory);
     on<AiTryOnReset>(_onReset);
   }
@@ -22,12 +26,13 @@ class AiTryOnBloc extends Bloc<AiTryOnEvent, AiTryOnState> {
     AiTryOnGenerate event,
     Emitter<AiTryOnState> emit,
   ) async {
-    emit( AiTryOnGenerating());
+    emit(const AiTryOnGenerating());
 
     final result = await generateTryOnUseCase(
       GenerateTryOnParams(
         productId: event.productId,
         userPhotoBase64: event.userPhotoBase64,
+        avatarId: event.avatarId,
       ),
     );
 
@@ -37,13 +42,27 @@ class AiTryOnBloc extends Bloc<AiTryOnEvent, AiTryOnState> {
     );
   }
 
+  Future<void> _onLoadAvatars(
+    AiTryOnLoadAvatars event,
+    Emitter<AiTryOnState> emit,
+  ) async {
+    emit(const AiTryOnLoadingAvatars());
+
+    final result = await getAvatarsUseCase(const NoParams());
+
+    result.fold(
+      (failure) => emit(AiTryOnError(message: failure.message)),
+      (avatars) => emit(AiTryOnAvatarsLoaded(avatars: avatars)),
+    );
+  }
+
   Future<void> _onLoadHistory(
     AiTryOnLoadHistory event,
     Emitter<AiTryOnState> emit,
   ) async {
-    emit( AiTryOnGenerating());
+    emit(const AiTryOnGenerating());
 
-    final result = await getTryOnHistoryUseCase( NoParams());
+    final result = await getTryOnHistoryUseCase(const NoParams());
 
     result.fold(
       (failure) => emit(AiTryOnError(message: failure.message)),
@@ -55,6 +74,6 @@ class AiTryOnBloc extends Bloc<AiTryOnEvent, AiTryOnState> {
     AiTryOnReset event,
     Emitter<AiTryOnState> emit,
   ) async {
-    emit( AiTryOnInitial());
+    emit(const AiTryOnInitial());
   }
 }

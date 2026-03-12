@@ -1,0 +1,29 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mock",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": ["run", "--dart-define=ENV=mock"],
+      "port": 8080
+    },
+    {
+      "name": "dev",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": ["run", "--dart-define=ENV=dev"],
+      "port": 8080
+    },
+    {
+      "name": "staging",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": ["run", "--dart-define=ENV=staging"],
+      "port": 8080
+    },
+    {
+      "name": "production",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": ["run", "--dart-define=ENV=production"],
+      "port": 8080
+    }
+  ]
+}

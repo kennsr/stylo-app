@@ -73,11 +73,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthLogoutRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit( AuthLoading());
-    final result = await logoutUseCase( NoParams());
+    // Do NOT emit AuthLoading here. Logout clears the local cache immediately,
+    // so the result is nearly instant. Emitting AuthLoading would cause GoRouter
+    // to redirect the user to /splash, and if anything went wrong before
+    // AuthUnauthenticated fired the user would be stuck there.
+    final result = await logoutUseCase(NoParams());
     result.fold(
       (failure) => emit(AuthError(message: failure.message)),
-      (_) => emit( AuthUnauthenticated()),
+      (_) => emit(AuthUnauthenticated()),
     );
   }
 }

@@ -1,6 +1,7 @@
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/network/api_client.dart';
+import '../../domain/entities/payment_method.dart';
 import '../models/placed_order_model.dart';
 import '../models/shipping_address_model.dart';
 import '../models/shipping_option_model.dart';
@@ -11,6 +12,7 @@ abstract class CheckoutRemoteDataSource {
     required String addressId,
     required double weight,
   });
+  Future<List<PaymentMethod>> getPaymentMethods();
   Future<PlacedOrderModel> placeOrder({
     required String addressId,
     required String shippingOptionId,
@@ -62,6 +64,22 @@ class CheckoutRemoteDataSourceImpl implements CheckoutRemoteDataSource {
       rethrow;
     } catch (e) {
       throw ServerException(message: 'Gagal mengambil opsi pengiriman: $e');
+    }
+  }
+
+  @override
+  Future<List<PaymentMethod>> getPaymentMethods() async {
+    try {
+      final response = await apiClient.get(ApiConstants.checkoutPayments);
+      final List<dynamic> data =
+          response['data'] as List<dynamic>? ?? [];
+      return data
+          .map((json) => PaymentMethod.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException(message: 'Gagal mengambil metode pembayaran: $e');
     }
   }
 

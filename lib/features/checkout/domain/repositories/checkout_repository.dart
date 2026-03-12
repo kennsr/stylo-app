@@ -1,5 +1,6 @@
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/either.dart';
+import '../entities/payment_method.dart';
 import '../entities/placed_order.dart';
 import '../entities/shipping_address.dart';
 import '../entities/shipping_option.dart';
@@ -10,6 +11,7 @@ abstract class CheckoutRepository {
     required String addressId,
     required double weight,
   });
+  Future<Either<Failure, List<PaymentMethod>>> getPaymentMethods();
   Future<Either<Failure, PlacedOrder>> placeOrder({
     required String addressId,
     required String shippingOptionId,

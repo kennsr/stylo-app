@@ -21,39 +21,47 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
     ProductDetailFetch event,
     Emitter<ProductDetailState> emit,
   ) async {
-    emit( ProductDetailLoading());
+    emit(ProductDetailLoading());
 
-    final productFuture = getProductDetailUseCase(
-      GetProductDetailParams(productId: event.productId),
-    );
-    final reviewsFuture = getReviewsUseCase(
-      GetReviewsParams(productId: event.productId),
-    );
+    try {
+      final productFuture = getProductDetailUseCase(
+        GetProductDetailParams(productId: event.productId),
+      );
+      final reviewsFuture = getReviewsUseCase(
+        GetReviewsParams(productId: event.productId),
+      );
 
-    final results = await Future.wait([productFuture, reviewsFuture]);
+      // Run both requests concurrently. Wrapped in try-catch because
+      // Future.wait re-throws if either future throws — any unhandled exception
+      // (e.g. a JSON parsing TypeError) would otherwise leave the bloc stuck at
+      // ProductDetailLoading with an infinite skeleton on screen.
+      final results = await Future.wait([productFuture, reviewsFuture]);
 
-    final productEither = results[0];
-    final reviewsEither = results[1];
+      final productEither = results[0];
+      final reviewsEither = results[1];
 
-    Product? product;
-    String? errorMessage;
+      Product? product;
+      String? errorMessage;
 
-    productEither.fold(
-      (failure) => errorMessage = failure.message,
-      (p) => product = p as Product,
-    );
+      productEither.fold(
+        (failure) => errorMessage = failure.message,
+        (p) => product = p as Product,
+      );
 
-    if (errorMessage != null) {
-      emit(ProductDetailError(message: errorMessage!));
-      return;
+      if (errorMessage != null) {
+        emit(ProductDetailError(message: errorMessage!));
+        return;
+      }
+
+      List<Review> reviews = [];
+      reviewsEither.fold(
+        (_) => reviews = [], // reviews failure is non-fatal — still show product
+        (r) => reviews = r as List<Review>,
+      );
+
+      emit(ProductDetailLoaded(product: product!, reviews: reviews));
+    } catch (e) {
+      emit(ProductDetailError(message: 'Gagal memuat produk: $e'));
     }
-
-    List<Review> reviews = [];
-    reviewsEither.fold(
-      (_) => reviews = [],
-      (r) => reviews = r as List<Review>,
-    );
-
-    emit(ProductDetailLoaded(product: product!, reviews: reviews));
   }
 }

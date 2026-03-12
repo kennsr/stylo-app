@@ -27,7 +27,7 @@ class ProductRepositoryImpl implements ProductRepository {
   }) async {
     final connected = await networkInfo.isConnected;
     if (!connected) {
-      return  Left(NetworkFailure());
+      return Left(NetworkFailure());
     }
     try {
       final models = await remoteDataSource.getProducts(
@@ -43,6 +43,10 @@ class ProductRepositoryImpl implements ProductRepository {
       return Left(ServerFailure(message: e.message));
     } on NetworkException catch (e) {
       return Left(NetworkFailure(message: e.message));
+    } catch (e) {
+      // Catch TypeError / FormatException from JSON parsing so they don't
+      // escape the Either boundary and leave the UI stuck on a skeleton.
+      return Left(ServerFailure(message: 'Gagal memproses data produk: $e'));
     }
   }
 
@@ -50,7 +54,7 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<Either<Failure, Product>> getProductDetail(String productId) async {
     final connected = await networkInfo.isConnected;
     if (!connected) {
-      return  Left(NetworkFailure());
+      return Left(NetworkFailure());
     }
     try {
       final model = await remoteDataSource.getProductDetail(productId);
@@ -61,6 +65,8 @@ class ProductRepositoryImpl implements ProductRepository {
       return Left(ServerFailure(message: e.message));
     } on NetworkException catch (e) {
       return Left(NetworkFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Gagal memproses detail produk: $e'));
     }
   }
 
@@ -68,7 +74,7 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<Either<Failure, List<Product>>> searchProducts(String query) async {
     final connected = await networkInfo.isConnected;
     if (!connected) {
-      return  Left(NetworkFailure());
+      return Left(NetworkFailure());
     }
     try {
       final models = await remoteDataSource.searchProducts(query);
@@ -79,6 +85,8 @@ class ProductRepositoryImpl implements ProductRepository {
       return Left(ServerFailure(message: e.message));
     } on NetworkException catch (e) {
       return Left(NetworkFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Gagal mencari produk: $e'));
     }
   }
 
@@ -86,7 +94,7 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<Either<Failure, List<Review>>> getReviews(String productId) async {
     final connected = await networkInfo.isConnected;
     if (!connected) {
-      return  Left(NetworkFailure());
+      return Left(NetworkFailure());
     }
     try {
       final models = await remoteDataSource.getReviews(productId);
@@ -97,6 +105,8 @@ class ProductRepositoryImpl implements ProductRepository {
       return Left(ServerFailure(message: e.message));
     } on NetworkException catch (e) {
       return Left(NetworkFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Gagal memuat ulasan: $e'));
     }
   }
 }

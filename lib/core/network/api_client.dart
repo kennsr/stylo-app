@@ -18,7 +18,8 @@ class ApiClient {
     return {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      if (token != null) 'Authorization': 'Bearer $token',
+      if (token != null && token.isNotEmpty)
+        'Authorization': 'Bearer $token',
     };
   }
 
@@ -27,6 +28,7 @@ class ApiClient {
     return Uri(
       scheme: base.scheme,
       host: base.host,
+      port: base.port,          // ← preserve port (e.g. 8080 for localhost)
       path: base.path + path,
       queryParameters: queryParams,
     );
@@ -37,7 +39,7 @@ class ApiClient {
     Map<String, String>? queryParams,
   }) async {
     if (EnvConfig.useMock) {
-      await Future.delayed( Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 500));
       return MockApiData.getMockResponse(path, method: 'GET');
     }
     try {
@@ -59,7 +61,7 @@ class ApiClient {
     Map<String, dynamic>? body,
   }) async {
     if (EnvConfig.useMock) {
-      await Future.delayed( Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 500));
       return MockApiData.getMockResponse(path, method: 'POST');
     }
     try {
@@ -85,12 +87,16 @@ class ApiClient {
     Map<String, dynamic>? body,
   }) async {
     if (EnvConfig.useMock) {
-      await Future.delayed( Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 500));
       return MockApiData.getMockResponse(path, method: 'PUT');
     }
     try {
       final response = await httpClient
-          .put(_buildUri(path), headers: _headers, body: jsonEncode(body ?? {}))
+          .put(
+            _buildUri(path),
+            headers: _headers,
+            body: jsonEncode(body ?? {}),
+          )
           .timeout(ApiConstants.receiveTimeout);
       return _handleResponse(response);
     } on ServerException {
@@ -107,7 +113,7 @@ class ApiClient {
     Map<String, dynamic>? body,
   }) async {
     if (EnvConfig.useMock) {
-      await Future.delayed( Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 500));
       return MockApiData.getMockResponse(path, method: 'PATCH');
     }
     try {
@@ -130,7 +136,7 @@ class ApiClient {
 
   Future<Map<String, dynamic>> delete(String path) async {
     if (EnvConfig.useMock) {
-      await Future.delayed( Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 500));
       return MockApiData.getMockResponse(path, method: 'DELETE');
     }
     try {
@@ -152,10 +158,10 @@ class ApiClient {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return body;
     } else if (response.statusCode == 401) {
-      throw  AuthException(message: 'Unauthorized');
+      throw AuthException(message: 'Sesi habis, silakan login kembali');
     } else {
       throw ServerException(
-        message: body['message'] as String? ?? 'Server error',
+        message: body['message'] as String? ?? 'Terjadi kesalahan pada server',
         statusCode: response.statusCode,
       );
     }

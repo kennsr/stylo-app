@@ -7,15 +7,17 @@ import '../repositories/ai_try_on_repository.dart';
 
 class GenerateTryOnParams extends Equatable {
   final String productId;
-  final String userPhotoBase64;
+  final String? userPhotoBase64;
+  final String? avatarId;
 
-   const GenerateTryOnParams({
+  const GenerateTryOnParams({
     required this.productId,
-    required this.userPhotoBase64,
+    this.userPhotoBase64,
+    this.avatarId,
   });
 
   @override
-  List<Object?> get props => [productId, userPhotoBase64];
+  List<Object?> get props => [productId, userPhotoBase64, avatarId];
 }
 
 class GenerateTryOnUseCase extends UseCase<TryOnResult, GenerateTryOnParams> {
@@ -28,6 +30,7 @@ class GenerateTryOnUseCase extends UseCase<TryOnResult, GenerateTryOnParams> {
     return repository.generateTryOn(
       productId: params.productId,
       userPhotoBase64: params.userPhotoBase64,
+      avatarId: params.avatarId,
     );
   }
 }

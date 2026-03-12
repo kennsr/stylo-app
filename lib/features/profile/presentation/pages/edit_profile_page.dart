@@ -17,17 +17,32 @@ class _EditProfilePageState extends State<EditProfilePage> {
   late final TextEditingController _nameController;
   late final TextEditingController _phoneController;
   bool _isSaving = false;
+  bool _controllersSeeded = false;
 
   @override
   void initState() {
     super.initState();
     final state = context.read<ProfileBloc>().state;
-    _nameController = TextEditingController(
-      text: state is ProfileLoaded ? state.user.name : '',
-    );
-    _phoneController = TextEditingController(
-      text: state is ProfileLoaded ? (state.user.phone ?? '') : '',
-    );
+    if (state is ProfileLoaded) {
+      _controllersSeeded = true;
+      _nameController = TextEditingController(text: state.user.name);
+      _phoneController = TextEditingController(text: state.user.phone ?? '');
+    } else {
+      // Profile not ready yet — controllers start empty and get filled by
+      // _seedControllers() once ProfileLoaded arrives via BlocListener.
+      _nameController = TextEditingController();
+      _phoneController = TextEditingController();
+    }
+  }
+
+  // Fills the text fields with server data the first time ProfileLoaded is
+  // received. Guarded by _controllersSeeded so a successful save (which also
+  // emits ProfileLoaded) doesn't overwrite what the user typed.
+  void _seedControllers(ProfileLoaded state) {
+    if (_controllersSeeded) return;
+    _controllersSeeded = true;
+    _nameController.text = state.user.name;
+    _phoneController.text = state.user.phone ?? '';
   }
 
   @override
@@ -57,14 +72,21 @@ class _EditProfilePageState extends State<EditProfilePage> {
         if (state is ProfileUpdating) {
           setState(() => _isSaving = true);
         } else if (state is ProfileLoaded) {
-          setState(() => _isSaving = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-             SnackBar(
-              content: Text('Profil berhasil diperbarui'),
-              backgroundColor: AppColors.success,
-            ),
-          );
-          Navigator.of(context).pop();
+          if (_isSaving) {
+            // Came from a save — show confirmation and go back.
+            setState(() => _isSaving = false);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Profil berhasil diperbarui'),
+                backgroundColor: AppColors.success,
+              ),
+            );
+            Navigator.of(context).pop();
+          } else {
+            // Came from initial data load (navigated here before ProfilePage
+            // finished fetching) — seed the form fields now.
+            _seedControllers(state);
+          }
         } else if (state is ProfileError) {
           setState(() => _isSaving = false);
           ScaffoldMessenger.of(context).showSnackBar(

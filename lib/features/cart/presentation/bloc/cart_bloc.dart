@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/usecase.dart';
 import '../../domain/entities/cart.dart';
 import '../../domain/usecases/add_to_cart_usecase.dart';
@@ -31,10 +32,17 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   }
 
   Future<void> _onFetch(CartFetch event, Emitter<CartState> emit) async {
-    emit( CartLoading());
-    final result = await getCartUseCase( NoParams());
+    emit(CartLoading());
+    final result = await getCartUseCase(NoParams());
     result.fold(
-      (failure) => emit(CartError(message: failure.message)),
+      (failure) {
+        // Unauthenticated users or guests should see an empty cart, not an error.
+        if (failure is AuthFailure) {
+          emit(CartLoaded(cart: Cart()));
+        } else {
+          emit(CartError(message: failure.message));
+        }
+      },
       (cart) => emit(CartLoaded(cart: cart)),
     );
   }

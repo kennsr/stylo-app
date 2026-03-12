@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 // Core
+import '../../core/constants/app_constants.dart';
+import '../../core/constants/env_config.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/network_info.dart';
 import '../../core/theme/theme_cubit.dart';
@@ -44,6 +46,7 @@ import '../../features/ai_try_on/data/datasources/ai_try_on_remote_data_source.d
 import '../../features/ai_try_on/data/repositories/ai_try_on_repository_impl.dart';
 import '../../features/ai_try_on/domain/repositories/ai_try_on_repository.dart';
 import '../../features/ai_try_on/domain/usecases/generate_try_on_usecase.dart';
+import '../../features/ai_try_on/domain/usecases/get_avatars_usecase.dart';
 import '../../features/ai_try_on/domain/usecases/get_try_on_history_usecase.dart';
 import '../../features/ai_try_on/domain/usecases/get_fit_profile_usecase.dart';
 import '../../features/ai_try_on/domain/usecases/save_fit_profile_usecase.dart';
@@ -66,6 +69,7 @@ import '../../features/checkout/data/datasources/checkout_remote_data_source.dar
 import '../../features/checkout/data/repositories/checkout_repository_impl.dart';
 import '../../features/checkout/domain/repositories/checkout_repository.dart';
 import '../../features/checkout/domain/usecases/get_addresses_usecase.dart';
+import '../../features/checkout/domain/usecases/get_payment_methods_usecase.dart';
 import '../../features/checkout/domain/usecases/get_shipping_options_usecase.dart';
 import '../../features/checkout/domain/usecases/place_order_usecase.dart';
 import '../../features/checkout/presentation/bloc/checkout_bloc.dart';
@@ -90,6 +94,7 @@ import '../../features/notifications/presentation/bloc/notifications_bloc.dart';
 
 // Wishlist
 import '../../features/wishlist/data/datasources/wishlist_local_data_source.dart';
+import '../../features/wishlist/data/datasources/wishlist_remote_data_source.dart';
 import '../../features/wishlist/data/repositories/wishlist_repository_impl.dart';
 import '../../features/wishlist/domain/repositories/wishlist_repository.dart';
 import '../../features/wishlist/domain/usecases/get_wishlist_usecase.dart';
@@ -108,9 +113,30 @@ import '../../features/profile/presentation/bloc/profile_bloc.dart';
 
 final sl = GetIt.instance;
 
+/// SharedPreferences key that tracks which environment last wrote session data.
+const _kLastEnvKey = 'stylo_last_env';
+
 Future<void> init() async {
   // ─── External ───────────────────────────────────────────────────────────────
   final prefs = await SharedPreferences.getInstance();
+
+  // ─── Stale-cache guard ──────────────────────────────────────────────────────
+  // When the environment changes (e.g. mock → dev, dev → staging), cached
+  // tokens, user objects, cart data and wishlist items from the previous
+  // environment must be removed.  Without this, a mock-mode session (with a
+  // fake token and seeded cart) would be visible the first time the app runs in
+  // a real environment, causing the user to appear logged-in as the mock
+  // account and see mock cart items.
+  final lastEnv = prefs.getString(_kLastEnvKey) ?? '';
+  final currentEnv = EnvConfig.current.name;
+  if (lastEnv != currentEnv) {
+    await prefs.remove(AppConstants.tokenKey);    // auth token
+    await prefs.remove(AppConstants.userKey);     // cached user object
+    await prefs.remove('cached_cart');            // CartLocalDataSourceImpl key
+    await prefs.remove('stylo_wishlist');         // WishlistLocalDataSourceImpl key
+    await prefs.setString(_kLastEnvKey, currentEnv);
+  }
+
   sl.registerLazySingleton<SharedPreferences>(() => prefs);
   sl.registerLazySingleton(() => http.Client());
   sl.registerLazySingleton(() => Connectivity());
@@ -196,8 +222,13 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetTryOnHistoryUseCase(repository: sl()));
   sl.registerLazySingleton(() => GetFitProfileUseCase(repository: sl()));
   sl.registerLazySingleton(() => SaveFitProfileUseCase(repository: sl()));
+  sl.registerLazySingleton(() => GetAvatarsUseCase(repository: sl()));
   sl.registerFactory(
-    () => AiTryOnBloc(generateTryOnUseCase: sl(), getTryOnHistoryUseCase: sl()),
+    () => AiTryOnBloc(
+      generateTryOnUseCase: sl(),
+      getTryOnHistoryUseCase: sl(),
+      getAvatarsUseCase: sl(),
+    ),
   );
 
   // ─── Cart ─────────────────────────────────────────────────────────────────
@@ -237,12 +268,14 @@ Future<void> init() async {
     () => CheckoutRepositoryImpl(remoteDataSource: sl()),
   );
   sl.registerLazySingleton(() => GetAddressesUseCase(sl()));
+  sl.registerLazySingleton(() => GetPaymentMethodsUseCase(sl()));
   sl.registerLazySingleton(() => GetShippingOptionsUseCase(sl()));
   sl.registerLazySingleton(() => PlaceOrderUseCase(sl()));
   sl.registerFactory(
     () => CheckoutBloc(
       getAddressesUseCase: sl(),
       getShippingOptionsUseCase: sl(),
+      getPaymentMethodsUseCase: sl(),
       placeOrderUseCase: sl(),
     ),
   );
@@ -283,8 +316,14 @@ Future<void> init() async {
   sl.registerLazySingleton<WishlistLocalDataSource>(
     () => WishlistLocalDataSourceImpl(prefs: sl()),
   );
+  sl.registerLazySingleton<WishlistRemoteDataSource>(
+    () => WishlistRemoteDataSourceImpl(apiClient: sl()),
+  );
   sl.registerLazySingleton<WishlistRepository>(
-    () => WishlistRepositoryImpl(localDataSource: sl()),
+    () => WishlistRepositoryImpl(
+      localDataSource: sl(),
+      remoteDataSource: sl(),
+    ),
   );
   sl.registerLazySingleton(() => GetWishlistUseCase(sl()));
   sl.registerLazySingleton(() => ToggleWishlistUseCase(sl()));

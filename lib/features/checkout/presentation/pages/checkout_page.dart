@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import '../../../../core/constants/app_constants.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../cart/presentation/bloc/cart_bloc.dart';
 import '../../../cart/presentation/bloc/cart_event.dart';
@@ -12,6 +12,7 @@ import '../bloc/checkout_event.dart';
 import '../bloc/checkout_state.dart';
 import '../widgets/address_card.dart';
 import '../widgets/payment_method_tile.dart';
+import '../../domain/entities/payment_method.dart';
 import '../widgets/shipping_option_tile.dart';
 import 'order_success_page.dart';
 import '../../../../core/theme/theme_ext.dart';
@@ -124,21 +125,25 @@ class _CheckoutPageState extends State<CheckoutPage> {
             List shippingOptions = [];
             dynamic selectedShipping;
             String? selectedPayment;
+            List<PaymentMethod> paymentMethods = [];
 
             if (checkoutState is CheckoutAddressesLoaded) {
               addresses = checkoutState.addresses;
               selectedAddressId = checkoutState.selectedAddressId;
+              paymentMethods = checkoutState.paymentMethods;
             } else if (checkoutState is CheckoutShippingLoaded) {
               addresses = checkoutState.addresses;
               selectedAddressId = checkoutState.selectedAddressId;
               shippingOptions = checkoutState.options;
               selectedShipping = checkoutState.selectedOption;
+              paymentMethods = checkoutState.paymentMethods;
             } else if (checkoutState is CheckoutReady) {
               addresses = checkoutState.addresses;
               selectedAddressId = checkoutState.selectedAddressId;
               shippingOptions = checkoutState.shippingOptions;
               selectedShipping = checkoutState.selectedShipping;
               selectedPayment = checkoutState.selectedPayment;
+              paymentMethods = checkoutState.paymentMethods;
             }
 
             return BlocBuilder<CartBloc, CartState>(
@@ -256,18 +261,28 @@ class _CheckoutPageState extends State<CheckoutPage> {
                             // Payment section
                             const _SectionHeader(
                                 title: 'Metode Pembayaran'),
-                            ...AppConstants.paymentMethods.map(
-                              (method) => PaymentMethodTile(
-                                method: method,
-                                isSelected: method == selectedPayment,
-                                onTap: () {
-                                  context.read<CheckoutBloc>().add(
-                                        CheckoutSelectPayment(
-                                            method: method),
-                                      );
-                                },
+                            if (paymentMethods.isEmpty)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.accent,
+                                  ),
+                                ),
+                              )
+                            else
+                              ...paymentMethods.map(
+                                (pm) => PaymentMethodTile(
+                                  paymentMethod: pm,
+                                  isSelected: pm.id == selectedPayment,
+                                  onTap: () {
+                                    context.read<CheckoutBloc>().add(
+                                          CheckoutSelectPayment(method: pm.id),
+                                        );
+                                  },
+                                ),
                               ),
-                            ),
 
                             // Order summary section
                             if (cart != null &&

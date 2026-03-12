@@ -16,6 +16,7 @@ class WishlistBloc extends Bloc<WishlistEvent, WishlistState> {
   }) : super(const WishlistInitial()) {
     on<WishlistLoad>(_onLoad);
     on<WishlistToggle>(_onToggle);
+    on<WishlistReset>(_onReset);
   }
 
   Future<void> _onLoad(
@@ -27,6 +28,10 @@ class WishlistBloc extends Bloc<WishlistEvent, WishlistState> {
       (failure) => emit(WishlistError(failure.message)),
       (items) => emit(WishlistLoaded(items)),
     );
+  }
+
+  void _onReset(WishlistReset event, Emitter<WishlistState> emit) {
+    emit(const WishlistLoaded([]));
   }
 
   Future<void> _onToggle(

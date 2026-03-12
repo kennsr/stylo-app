@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -12,6 +13,7 @@ import '../core/widgets/keyboard_dismiss_bar.dart';
 // Auth
 import '../features/auth/presentation/bloc/auth_bloc.dart';
 import '../features/auth/presentation/bloc/auth_event.dart';
+import '../features/auth/presentation/bloc/auth_state.dart';
 import '../features/auth/presentation/pages/splash_page.dart';
 import '../features/auth/presentation/pages/login_page.dart';
 import '../features/auth/presentation/pages/register_page.dart';
@@ -64,6 +66,24 @@ import '../features/profile/presentation/bloc/profile_bloc.dart';
 import '../features/profile/presentation/pages/profile_page.dart';
 import '../features/profile/presentation/pages/edit_profile_page.dart';
 
+// ── Auth router notifier ──────────────────────────────────────────────────────
+// Bridges AuthBloc stream → GoRouter refreshListenable so the router
+// re-evaluates its redirect whenever auth state changes.
+
+class _AuthRouterNotifier extends ChangeNotifier {
+  _AuthRouterNotifier(Stream<AuthState> stream) {
+    _subscription = stream.listen((_) => notifyListeners());
+  }
+
+  late final StreamSubscription<AuthState> _subscription;
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+}
+
 // ── Fade transition helper ────────────────────────────────────────────────────
 
 Page<void> _fadePage(GoRouterState state, Widget child) {
@@ -81,16 +101,38 @@ Page<void> _fadePage(GoRouterState state, Widget child) {
 
 // ── App ───────────────────────────────────────────────────────────────────────
 
-class StyloApp extends StatelessWidget {
+class StyloApp extends StatefulWidget {
   const StyloApp({super.key});
+
+  @override
+  State<StyloApp> createState() => _StyloAppState();
+}
+
+class _StyloAppState extends State<StyloApp> {
+  late final AuthBloc _authBloc;
+  late final _AuthRouterNotifier _routerNotifier;
+  late final GoRouter _router;
+
+  @override
+  void initState() {
+    super.initState();
+    _authBloc = di.sl<AuthBloc>()..add(const AuthCheckStatus());
+    _routerNotifier = _AuthRouterNotifier(_authBloc.stream);
+    _router = _buildRouter();
+  }
+
+  @override
+  void dispose() {
+    _routerNotifier.dispose();
+    _authBloc.close();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<AuthBloc>(
-          create: (_) => di.sl<AuthBloc>()..add(const AuthCheckStatus()),
-        ),
+        BlocProvider<AuthBloc>.value(value: _authBloc),
         BlocProvider<CartBloc>(
           create: (_) => di.sl<CartBloc>()..add(const CartFetch()),
         ),
@@ -101,19 +143,38 @@ class StyloApp extends StatelessWidget {
           create: (_) => di.sl<ThemeCubit>()..loadSavedTheme(),
         ),
       ],
-      child: BlocBuilder<ThemeCubit, ThemeMode>(
-        builder: (context, themeMode) {
-          return MaterialApp.router(
-            title: 'Stylo',
-            debugShowCheckedModeBanner: false,
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            themeMode: themeMode,
-            routerConfig: _buildRouter(),
-            builder: (context, child) =>
-                KeyboardDismissBar(child: child!),
-          );
-        },
+      // React to auth state changes to keep cart & wishlist in sync with the
+      // currently logged-in user.
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<AuthBloc, AuthState>(
+            listener: (context, state) {
+              if (state is AuthAuthenticated) {
+                // Re-fetch cart and wishlist for the newly authenticated user.
+                context.read<CartBloc>().add(const CartFetch());
+                context.read<WishlistBloc>().add(const WishlistLoad());
+              } else if (state is AuthUnauthenticated) {
+                // Clear cart and wishlist so previous user's data is not visible.
+                context.read<CartBloc>().add(const CartClear());
+                context.read<WishlistBloc>().add(const WishlistReset());
+              }
+            },
+          ),
+        ],
+        child: BlocBuilder<ThemeCubit, ThemeMode>(
+          builder: (context, themeMode) {
+            return MaterialApp.router(
+              title: 'Stylo',
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.lightTheme,
+              darkTheme: AppTheme.darkTheme,
+              themeMode: themeMode,
+              routerConfig: _router,
+              builder: (context, child) =>
+                  KeyboardDismissBar(child: child!),
+            );
+          },
+        ),
       ),
     );
   }
@@ -121,13 +182,49 @@ class StyloApp extends StatelessWidget {
   GoRouter _buildRouter() {
     return GoRouter(
       initialLocation: '/splash',
+      refreshListenable: _routerNotifier,
       redirect: (context, state) {
+        final authState = _authBloc.state;
         final location = state.matchedLocation;
-        if (location == '/splash' ||
-            location == '/login' ||
-            location == '/register') {
+        final isOnSplash = location == '/splash';
+        final isLoginFlow =
+            location == '/login' || location == '/register';
+
+        // While auth is loading, show splash — but if the user is already on
+        // the login/register page (they tapped "Masuk"), stay there: those
+        // pages show their own loading spinner inside the button.
+        // Redirecting to /splash mid-login would mean an AuthError later
+        // triggers the "on splash → /home" rule and silently skips auth.
+        if (authState is AuthInitial || authState is AuthLoading) {
+          if (isLoginFlow) return null;
+          return isOnSplash ? null : '/splash';
+        }
+
+        // Confirmed unauthenticated (clean logout, no token, or app start
+        // with no cached session). Guests can browse freely.
+        if (authState is AuthUnauthenticated) {
+          if (isOnSplash) return '/home'; // post-logout: land as guest
+          if (isLoginFlow) return null;
+          if (_requiresAuth(location)) return '/login';
           return null;
         }
+
+        // Auth failed (wrong credentials, network error, expired token).
+        // Always route to /login so the user can see the error and retry —
+        // never to /home (that would log them in without a real session).
+        if (authState is AuthError) {
+          if (isOnSplash) return '/login';
+          if (isLoginFlow) return null; // BlocConsumer on login page shows snackbar
+          if (_requiresAuth(location)) return '/login';
+          return null;
+        }
+
+        // Authenticated → skip splash / auth pages entirely.
+        if (authState is AuthAuthenticated) {
+          if (isOnSplash || isLoginFlow) return '/home';
+          return null;
+        }
+
         return null;
       },
       routes: [
@@ -305,30 +402,35 @@ class StyloApp extends StatelessWidget {
             // Profil branch
             StatefulShellBranch(
               routes: [
-                GoRoute(
-                  path: '/profile',
-                  pageBuilder: (context, state) => _fadePage(
-                    state,
-                    BlocProvider(
-                      create: (_) => di.sl<ProfileBloc>(),
-                      child: const ProfilePage(),
-                    ),
+                // ShellRoute provides ONE ProfileBloc for every page in the
+                // profile sub-tree.  GoRouter's ShellRoute wraps its inner
+                // Navigator with the builder result, so /profile, /profile/edit,
+                // and /profile/wishlist all sit inside the same BlocProvider.
+                // This prevents ProviderNotFoundException, ensures the edit
+                // form pre-fills with the already-loaded user, and makes a
+                // successful save immediately visible back on the profile page.
+                ShellRoute(
+                  builder: (context, state, child) => BlocProvider(
+                    create: (_) => di.sl<ProfileBloc>(),
+                    child: child,
                   ),
                   routes: [
                     GoRoute(
-                      path: 'edit',
-                      pageBuilder: (context, state) => _fadePage(
-                        state,
-                        BlocProvider(
-                          create: (_) => di.sl<ProfileBloc>(),
-                          child: const EditProfilePage(),
-                        ),
-                      ),
-                    ),
-                    GoRoute(
-                      path: 'wishlist',
+                      path: '/profile',
                       pageBuilder: (context, state) =>
-                          _fadePage(state, const WishlistPage()),
+                          _fadePage(state, const ProfilePage()),
+                      routes: [
+                        GoRoute(
+                          path: 'edit',
+                          pageBuilder: (context, state) =>
+                              _fadePage(state, const EditProfilePage()),
+                        ),
+                        GoRoute(
+                          path: 'wishlist',
+                          pageBuilder: (context, state) =>
+                              _fadePage(state, const WishlistPage()),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -338,5 +440,18 @@ class StyloApp extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  /// Routes that require the user to be authenticated.
+  /// Guests can browse home, search, and product pages freely.
+  bool _requiresAuth(String location) {
+    const protectedPrefixes = [
+      '/cart',
+      '/checkout',
+      '/try-on',
+      '/orders',
+      '/profile',
+    ];
+    return protectedPrefixes.any((prefix) => location.startsWith(prefix));
   }
 }

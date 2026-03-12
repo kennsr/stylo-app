@@ -5,33 +5,43 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "stylo-app",
-      "request": "launch",
-      "type": "dart"
-    },
-    {
       "name": "stylo-app (mock mode)",
       "request": "launch",
       "type": "dart",
       "toolArgs": ["--dart-define", "ENV=mock"]
     },
     {
+      "name": "stylo-app (dev mode)",
+      "request": "launch",
+      "type": "dart",
+      "toolArgs": ["--dart-define", "ENV=dev"]
+    },
+    {
+      "name": "stylo-app (dev mode — iPhone Wireless)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "00008130-0005388E1E89001C",
+      "toolArgs": ["--dart-define", "ENV=dev"]
+    },
+    {
+      "name": "stylo-app (staging mode)",
+      "request": "launch",
+      "type": "dart",
+      "toolArgs": ["--dart-define", "ENV=staging"]
+    },
+    {
+      "name": "stylo-app (production — release)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release",
+      "toolArgs": ["--dart-define", "ENV=production"]
+    },
+    {
       "name": "stylo-app (profile mode)",
       "request": "launch",
       "type": "dart",
-      "flutterMode": "profile"
-    },
-    {
-      "name": "stylo-app (release mode)",
-      "request": "launch",
-      "type": "dart",
-      "flutterMode": "release"
-    },
-    {
-      "name": "iPhone Wireless",
-      "request": "launch",
-      "type": "dart",
-      "deviceId": "00008130-0005388E1E89001C"
+      "flutterMode": "profile",
+      "toolArgs": ["--dart-define", "ENV=dev"]
     }
   ]
 }

@@ -1,14 +1,15 @@
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/either.dart';
-import '../models/shipping_address_model.dart';
-import '../models/shipping_option_model.dart';
-import '../models/placed_order_model.dart';
+import '../../domain/entities/payment_method.dart';
 import '../../domain/entities/placed_order.dart';
 import '../../domain/entities/shipping_address.dart';
 import '../../domain/entities/shipping_option.dart';
 import '../../domain/repositories/checkout_repository.dart';
 import '../datasources/checkout_remote_data_source.dart';
+import '../models/placed_order_model.dart';
+import '../models/shipping_address_model.dart';
+import '../models/shipping_option_model.dart';
 
 class CheckoutRepositoryImpl implements CheckoutRepository {
   final CheckoutRemoteDataSource remoteDataSource;
@@ -40,6 +41,20 @@ class CheckoutRepositoryImpl implements CheckoutRepository {
         weight: weight,
       );
       return Right(models.map((m) => m.toEntity()).toList());
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } on AuthException catch (e) {
+      return Left(AuthFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<PaymentMethod>>> getPaymentMethods() async {
+    try {
+      final methods = await remoteDataSource.getPaymentMethods();
+      return Right(methods);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } on AuthException catch (e) {

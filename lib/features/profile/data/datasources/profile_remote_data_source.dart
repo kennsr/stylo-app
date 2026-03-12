@@ -22,6 +22,8 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       final response = await apiClient.get(ApiConstants.profile);
       final data = response['data'] as Map<String, dynamic>? ?? response;
       return UserModel.fromJson(data);
+    } on AuthException {
+      rethrow;
     } on ServerException {
       rethrow;
     } catch (e) {
@@ -40,6 +42,8 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       final response = await apiClient.put(ApiConstants.profile, body: body);
       final data = response['data'] as Map<String, dynamic>? ?? response;
       return UserModel.fromJson(data);
+    } on AuthException {
+      rethrow;
     } on ServerException {
       rethrow;
     } catch (e) {
@@ -58,6 +62,8 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
           .map((json) =>
               StylePreferenceModel.fromJson(json as Map<String, dynamic>))
           .toList();
+    } on AuthException {
+      rethrow;
     } on ServerException {
       rethrow;
     } catch (e) {
@@ -72,6 +78,8 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
         '${ApiConstants.profile}/style-preferences',
         body: {'preference_ids': preferenceIds},
       );
+    } on AuthException {
+      rethrow;
     } on ServerException {
       rethrow;
     } catch (e) {

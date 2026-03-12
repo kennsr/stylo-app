@@ -20,3 +20,12 @@ class WishlistToggle extends WishlistEvent {
   @override
   List<Object?> get props => [product.id];
 }
+
+/// Clears the in-memory wishlist without touching local storage.
+/// Dispatched on logout so the next user's session starts clean.
+class WishlistReset extends WishlistEvent {
+  const WishlistReset();
+
+  @override
+  List<Object?> get props => [];
+}

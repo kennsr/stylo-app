@@ -7,6 +7,8 @@ import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/stylo_try_on_toggle.dart';
+import '../../../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../../../../features/auth/presentation/bloc/auth_state.dart';
 import '../../domain/entities/product.dart';
 import '../bloc/product_detail_bloc.dart';
 import '../bloc/product_detail_event.dart';
@@ -48,6 +50,16 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     super.dispose();
   }
 
+  /// Runs [action] if the user is logged in; otherwise navigates to /login.
+  void _requireAuth(VoidCallback action) {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated) {
+      action();
+    } else {
+      context.push('/login');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,7 +68,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         builder: (context, state) {
           if (state is ProductDetailLoaded) {
             return AddToCartBar(
-              onAddToCart: () {
+              onAddToCart: () => _requireAuth(() {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
@@ -70,7 +82,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     ),
                   ),
                 );
-              },
+              }),
             );
           }
           return  SizedBox.shrink();
@@ -388,11 +400,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             width: double.infinity,
                             height: 48,
                             child: ElevatedButton.icon(
-                              onPressed: () {
+                              onPressed: () => _requireAuth(() {
                                 context.go(
                                   '/try-on?productId=${product.id}',
                                 );
-                              },
+                              }),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.accent,
                                 foregroundColor: Colors.white,

@@ -209,7 +209,44 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ],
                     ),
-                     SizedBox(height: 24),
+                    const SizedBox(height: 4),
+                    // ── Guest browsing ──────────────────────────────────────
+                    Row(
+                      children: [
+                        Expanded(child: Divider(color: context.dividerColor)),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text(
+                            'atau',
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: context.secondaryTextColor,
+                            ),
+                          ),
+                        ),
+                        Expanded(child: Divider(color: context.dividerColor)),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    SizedBox(
+                      width: double.infinity,
+                      child: TextButton(
+                        onPressed: () => context.go('/home'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: context.secondaryTextColor,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        child: Text(
+                          'Lanjutkan sebagai Tamu',
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: context.secondaryTextColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
                   ],
                 ),
               ),

@@ -10,15 +10,19 @@ abstract class ProductModel with _$ProductModel {
   const factory ProductModel({
     required String id,
     required String name,
-    required String description,
+    // Give safe defaults to fields a real server may omit or return as null.
+    // Without @Default, a missing/null JSON field throws TypeError inside
+    // fromJson, which propagates past the repository's specific catch clauses
+    // and leaves the ProductDetailBloc stuck at ProductDetailLoading forever.
+    @Default('') String description,
     required double price,
     @JsonKey(name: 'discount_price') double? discountPrice,
-    required String category,
-    required List<String> images,
-    required List<ProductVariantModel> variants,
-    required double rating,
-    @JsonKey(name: 'review_count') required int reviewCount,
-    required int stock,
+    @Default('') String category,
+    @Default([]) List<String> images,
+    @Default([]) List<ProductVariantModel> variants,
+    @Default(0.0) double rating,
+    @JsonKey(name: 'review_count') @Default(0) int reviewCount,
+    @Default(0) int stock,
     @JsonKey(name: 'is_featured') @Default(false) bool isFeatured,
     @JsonKey(name: 'has_ai_try_on') @Default(false) bool hasAiTryOn,
   }) = _ProductModel;
