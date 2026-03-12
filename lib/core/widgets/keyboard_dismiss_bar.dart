@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_ext.dart';
 
-/// Global overlay that shows a "close keyboard" toolbar just above the
-/// software keyboard whenever it is visible. Wrap [MaterialApp.builder]
+/// Global overlay that shows a floating "close keyboard" button just above
+/// the software keyboard whenever it is visible. Wrap [MaterialApp.builder]
 /// with this widget.
 class KeyboardDismissBar extends StatelessWidget {
   final Widget child;
@@ -22,13 +21,12 @@ class KeyboardDismissBar extends StatelessWidget {
         AnimatedPositioned(
           duration: const Duration(milliseconds: 220),
           curve: Curves.easeOut,
-          bottom: isVisible ? bottomInset : -48,
-          left: 0,
-          right: 0,
+          bottom: isVisible ? bottomInset + 16 : -60,
+          right: 16,
           child: AnimatedOpacity(
             duration: const Duration(milliseconds: 160),
             opacity: isVisible ? 1.0 : 0.0,
-            child: const _DismissToolbar(),
+            child: const _DismissFloatingButton(),
           ),
         ),
       ],
@@ -36,62 +34,39 @@ class KeyboardDismissBar extends StatelessWidget {
   }
 }
 
-class _DismissToolbar extends StatelessWidget {
-  const _DismissToolbar();
+class _DismissFloatingButton extends StatelessWidget {
+  const _DismissFloatingButton();
 
   @override
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
+      elevation: 8,
+      borderRadius: BorderRadius.circular(20),
       child: Container(
-        height: 44,
         decoration: BoxDecoration(
-          color: context.backgroundColor,
-          border: Border(
-            top: BorderSide(color: context.dividerColor, width: 1),
-          ),
+          color: context.surfaceColor,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: context.dividerColor, width: 1),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 8,
-              offset: const Offset(0, -2),
+              color: Colors.black.withValues(alpha: 0.12),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            // Dismiss button
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.keyboard_hide_rounded,
-                      size: 18,
-                      color: AppColors.accent,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Tutup',
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.accent,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+        child: InkWell(
+          onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Icon(
+              Icons.keyboard_hide_rounded,
+              size: 20,
+              color: AppColors.accent,
             ),
-          ],
+          ),
         ),
       ),
     );

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'di/injection_container.dart' as di;
 import 'main_shell.dart';
 
@@ -65,6 +66,11 @@ import '../features/wishlist/presentation/pages/wishlist_page.dart';
 import '../features/profile/presentation/bloc/profile_bloc.dart';
 import '../features/profile/presentation/pages/profile_page.dart';
 import '../features/profile/presentation/pages/edit_profile_page.dart';
+
+// Onboarding
+import '../core/constants/app_constants.dart';
+import '../features/onboarding/presentation/cubit/onboarding_cubit.dart';
+import '../features/onboarding/presentation/pages/onboarding_page.dart';
 
 // ── Auth router notifier ──────────────────────────────────────────────────────
 // Bridges AuthBloc stream → GoRouter refreshListenable so the router
@@ -219,9 +225,22 @@ class _StyloAppState extends State<StyloApp> {
           return null;
         }
 
-        // Authenticated → skip splash / auth pages entirely.
+        // Authenticated → check onboarding status first.
         if (authState is AuthAuthenticated) {
-          if (isOnSplash || isLoginFlow) return '/home';
+          final prefs = di.sl<SharedPreferences>();
+          // Per-user key: each account gets its own onboarding flag so that
+          // a second registration on the same device isn't skipped.
+          final userId = authState.user.id;
+          final onboardingDone =
+              prefs.getBool('${AppConstants.onboardingKey}_$userId') ?? false;
+
+          if (isOnSplash || isLoginFlow) {
+            return onboardingDone ? '/home' : '/onboarding';
+          }
+          // Already on onboarding — allow if not done, redirect if done
+          if (location == '/onboarding') {
+            return onboardingDone ? '/home' : null;
+          }
           return null;
         }
 
@@ -241,6 +260,18 @@ class _StyloAppState extends State<StyloApp> {
           path: '/register',
           pageBuilder: (context, state) =>
               _fadePage(state, const RegisterPage()),
+        ),
+
+        // ── Onboarding (outside shell — no bottom nav) ────────────────────────
+        GoRoute(
+          path: '/onboarding',
+          pageBuilder: (context, state) => _fadePage(
+            state,
+            BlocProvider(
+              create: (_) => di.sl<OnboardingCubit>(),
+              child: const OnboardingPage(),
+            ),
+          ),
         ),
 
         // ── Checkout (outside shell — no bottom nav) ──────────────────────────
@@ -451,6 +482,7 @@ class _StyloAppState extends State<StyloApp> {
       '/try-on',
       '/orders',
       '/profile',
+      '/onboarding',
     ];
     return protectedPrefixes.any((prefix) => location.startsWith(prefix));
   }

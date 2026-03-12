@@ -33,7 +33,12 @@ class AuthRepositoryImpl implements AuthRepository {
         password: password,
       );
       await localDataSource.cacheUser(result.user);
-      await localDataSource.cacheToken(result.token); // ← real token
+      // Cache session token with expiry (if backend provides it)
+      // For now, we set a long expiry (30 days) - adjust based on your backend
+      await localDataSource.cacheSessionToken(
+        result.token,
+        expiresAt: DateTime.now().add(const Duration(days: 30)),
+      );
       return Right(result.user.toEntity());
     } on AuthException catch (e) {
       return Left(AuthFailure(message: e.message));
@@ -64,7 +69,11 @@ class AuthRepositoryImpl implements AuthRepository {
         password: password,
       );
       await localDataSource.cacheUser(result.user);
-      await localDataSource.cacheToken(result.token); // ← real token
+      // Cache session token with expiry (if backend provides it)
+      await localDataSource.cacheSessionToken(
+        result.token,
+        expiresAt: DateTime.now().add(const Duration(days: 30)),
+      );
       return Right(result.user.toEntity());
     } on AuthException catch (e) {
       return Left(AuthFailure(message: e.message));
@@ -82,7 +91,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, void>> logout() async {
     // Always clear local session first — logout must NEVER fail from the
     // user's perspective even if the server is unreachable or returns an error.
-    await localDataSource.clearCache();
+    await localDataSource.clearSession();
     try {
       if (await networkInfo.isConnected) {
         await remoteDataSource.logout(); // best-effort: invalidate token on server
@@ -101,17 +110,36 @@ class AuthRepositoryImpl implements AuthRepository {
         // In real environments: ALWAYS verify token with the server.
         // Never trust stale cache — it could be leftover from mock mode
         // or a previous session with an expired token.
-        final token = await localDataSource.getToken();
+        
+        // First check if session is valid (token exists, not expired, within max age)
+        final sessionValid = await localDataSource.isSessionValid();
+        if (!sessionValid) {
+          await localDataSource.clearSession();
+          return Left(AuthFailure(message: 'Sesi telah kadaluarsa, silakan login kembali'));
+        }
+        
+        final token = await localDataSource.getSessionToken();
         if (token == null || token.isEmpty) {
-          await localDataSource.clearCache();
+          await localDataSource.clearSession();
           return Left(AuthFailure(message: 'Sesi tidak ditemukan, silakan login'));
         }
+        
         if (!await networkInfo.isConnected) {
           // Offline: fall back to cached user so the app still works
           final cachedUser = await localDataSource.getCachedUser();
           if (cachedUser != null) return Right(cachedUser.toEntity());
           return Left(NetworkFailure(message: 'Tidak ada koneksi internet'));
         }
+        
+        // Check if token needs refresh (approaching expiry)
+        if (await localDataSource.shouldRefreshToken()) {
+          if (await localDataSource.canRefreshToken()) {
+            // Attempt to refresh token (if your backend supports it)
+            // For now, just update the last refresh time to prevent rapid retries
+            await localDataSource.cacheLastRefreshTime(DateTime.now());
+          }
+        }
+        
         // Hit GET /auth/me — throws AuthException on 401 (invalid/expired token)
         final userModel = await remoteDataSource.getCurrentUser();
         await localDataSource.cacheUser(userModel);
@@ -127,7 +155,7 @@ class AuthRepositoryImpl implements AuthRepository {
       return Right(userModel.toEntity());
     } on AuthException catch (e) {
       // 401 from server → token is invalid, force re-login
-      await localDataSource.clearCache();
+      await localDataSource.clearSession();
       return Left(AuthFailure(message: e.message));
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));

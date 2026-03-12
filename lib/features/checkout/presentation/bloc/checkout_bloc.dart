@@ -81,7 +81,7 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
     Emitter<CheckoutState> emit,
   ) async {
     final currentState = state;
-    List addresses = [];
+    List<ShippingAddress> addresses = [];
     List<PaymentMethod> paymentMethods = [];
 
     if (currentState is CheckoutAddressesLoaded) {
@@ -109,7 +109,7 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
     Emitter<CheckoutState> emit,
   ) async {
     final currentState = state;
-    List addresses = [];
+    List<ShippingAddress> addresses = [];
     List<PaymentMethod> paymentMethods = [];
 
     if (currentState is CheckoutAddressesLoaded) {

@@ -15,6 +15,7 @@ import '../../features/auth/data/datasources/auth_local_data_source.dart';
 import '../../features/auth/data/datasources/auth_remote_data_source.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
+import '../../features/auth/domain/services/session_manager.dart';
 import '../../features/auth/domain/usecases/login_usecase.dart';
 import '../../features/auth/domain/usecases/register_usecase.dart';
 import '../../features/auth/domain/usecases/logout_usecase.dart';
@@ -111,6 +112,9 @@ import '../../features/profile/domain/usecases/get_style_preferences_usecase.dar
 import '../../features/profile/domain/usecases/update_style_preferences_usecase.dart';
 import '../../features/profile/presentation/bloc/profile_bloc.dart';
 
+// Onboarding
+import '../../features/onboarding/presentation/cubit/onboarding_cubit.dart';
+
 final sl = GetIt.instance;
 
 /// SharedPreferences key that tracks which environment last wrote session data.
@@ -130,8 +134,12 @@ Future<void> init() async {
   final lastEnv = prefs.getString(_kLastEnvKey) ?? '';
   final currentEnv = EnvConfig.current.name;
   if (lastEnv != currentEnv) {
-    await prefs.remove(AppConstants.tokenKey);    // auth token
+    await prefs.remove(AppConstants.tokenKey);    // legacy auth token
     await prefs.remove(AppConstants.userKey);     // cached user object
+    await prefs.remove('stylo_session_token');    // enterprise session token
+    await prefs.remove('stylo_token_expiry');     // token expiry timestamp
+    await prefs.remove('stylo_last_login');       // last login timestamp
+    await prefs.remove('stylo_last_refresh');     // last token refresh
     await prefs.remove('cached_cart');            // CartLocalDataSourceImpl key
     await prefs.remove('stylo_wishlist');         // WishlistLocalDataSourceImpl key
     await prefs.setString(_kLastEnvKey, currentEnv);
@@ -157,6 +165,13 @@ Future<void> init() async {
   sl.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(
       remoteDataSource: sl(),
+      localDataSource: sl(),
+      networkInfo: sl(),
+    ),
+  );
+  // Session Manager for enterprise-level session persistence
+  sl.registerLazySingleton(
+    () => SessionManager(
       localDataSource: sl(),
       networkInfo: sl(),
     ),
@@ -351,6 +366,16 @@ Future<void> init() async {
       updateProfileUseCase: sl(),
       getStylePreferencesUseCase: sl(),
       updateStylePreferencesUseCase: sl(),
+    ),
+  );
+
+  // ─── Onboarding ───────────────────────────────────────────────────────────
+  sl.registerFactory(
+    () => OnboardingCubit(
+      updateProfileUseCase: sl(),
+      updateStylePrefsUseCase: sl(),
+      saveFitProfileUseCase: sl(),
+      prefs: sl(),
     ),
   );
 }
