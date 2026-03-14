@@ -33,137 +33,151 @@ class ProductSummaryCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: () => context.push('/products/${product.id}'),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Fixed height image section
-          SizedBox(
-            height: 200,
-            width: double.infinity,
-            child: _buildImageSection(context, discountPercent),
-          ),
-          // Product info (no padding container, just direct text)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  product.name,
-                  style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: context.primaryTextColor,
-                    letterSpacing: -0.2,
-                    height: 1.3,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 6),
-                if (product.discountPrice != null) ...[
-                  Text(
-                    _formatCurrency(product.price),
-                    style: GoogleFonts.poppins(
-                      fontSize: 11,
-                      color: context.tertiaryTextColor,
-                      decoration: TextDecoration.lineThrough,
-                      decorationColor: context.tertiaryTextColor,
-                    ),
-                  ),
-                  Text(
-                    _formatCurrency(product.discountPrice!),
-                    style: GoogleFonts.poppins(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primary,
-                      letterSpacing: -0.3,
-                    ),
-                  ),
-                ] else
-                  Text(
-                    _formatCurrency(product.price),
-                    style: GoogleFonts.poppins(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primary,
-                      letterSpacing: -0.3,
-                    ),
-                  ),
-                if (product.rating != null) ...[
-                  const SizedBox(height: 4),
-                  _buildRating(context, product.rating!),
-                ],
-              ],
+      child: Container(
+        decoration: BoxDecoration(
+          color: context.surfaceColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: context.dividerColor, width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: context.shadowColor,
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
-          ),
-        ],
+          ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: SizedBox(
+                width: double.infinity,
+                child: _buildImageSection(context, discountPercent),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    product.name,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: context.primaryTextColor,
+                      height: 1.3,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 6),
+                  if (product.discountPrice != null) ...[
+                    Text(
+                      _formatCurrency(product.price),
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: context.tertiaryTextColor,
+                        decoration: TextDecoration.lineThrough,
+                        decorationColor: context.tertiaryTextColor,
+                      ),
+                    ),
+                    Text(
+                      _formatCurrency(product.discountPrice!),
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                  ] else
+                    Text(
+                      _formatCurrency(product.price),
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                  if (product.rating != null) ...[
+                    const SizedBox(height: 4),
+                    _buildRating(context, product.rating!),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildImageSection(BuildContext context, int discountPercent) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        _buildImage(context),
-        if (product.hasAiTryOn)
-          Positioned(
-            top: 8,
-            left: 8,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppColors.primaryGradientStart, AppColors.primaryGradientEnd],
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          _buildImage(context),
+          if (product.hasAiTryOn)
+            Positioned(
+              top: 8,
+              left: 8,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppColors.primaryGradientStart, AppColors.primaryGradientEnd],
+                  ),
+                  borderRadius: BorderRadius.circular(6),
                 ),
-                borderRadius: BorderRadius.circular(6),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.auto_awesome_rounded,
+                      size: 10,
+                      color: Colors.white,
+                    ),
+                    const SizedBox(width: 3),
+                    Text(
+                      'AI',
+                      style: GoogleFonts.inter(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.auto_awesome_rounded,
-                    size: 10,
+            ),
+          if (discountPercent > 0)
+            Positioned(
+              top: 8,
+              right: 8,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppColors.error,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  '-$discountPercent%',
+                  style: GoogleFonts.inter(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
                     color: Colors.white,
                   ),
-                  const SizedBox(width: 3),
-                  Text(
-                    'AI',
-                    style: GoogleFonts.poppins(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        if (discountPercent > 0)
-          Positioned(
-            top: 8,
-            right: 8,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-              decoration: BoxDecoration(
-                color: AppColors.error,
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text(
-                '-$discountPercent%',
-                style: GoogleFonts.poppins(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                  letterSpacing: 0.3,
                 ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -182,7 +196,6 @@ class ProductSummaryCard extends StatelessWidget {
               child: Container(color: Colors.white),
             ),
             errorWidget: (context, url, error) {
-              // Show placeholder with product name when image fails
               return Container(
                 color: context.surfaceHighColor,
                 child: Column(
@@ -196,7 +209,7 @@ class ProductSummaryCard extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       product.name,
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.inter(
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
                         color: context.primaryTextColor,
@@ -227,7 +240,7 @@ class ProductSummaryCard extends StatelessWidget {
         const SizedBox(width: 3),
         Text(
           rating.toStringAsFixed(1),
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.inter(
             fontSize: 11,
             color: context.secondaryTextColor,
             fontWeight: FontWeight.w500,

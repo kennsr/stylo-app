@@ -144,7 +144,7 @@ class _HomePageState extends State<HomePage> {
       surfaceTintColor: Colors.transparent,
       title: const Padding(
         padding: EdgeInsets.only(left: 16),
-        child: StyloLogo(size: 36),
+        child: StyloLogo(size: 56),
       ),
       actions: [
         IconButton(

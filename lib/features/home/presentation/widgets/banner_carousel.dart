@@ -67,7 +67,10 @@ class _BannerCarouselState extends State<BannerCarousel> {
             },
             itemBuilder: (context, index) {
               final entity.Banner banner = widget.banners[index];
-              return _BannerItem(banner: banner);
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: _BannerItem(banner: banner),
+              );
             },
           ),
         ),
@@ -108,7 +111,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
             margin: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(12),
             ),
           ),
         ),
@@ -140,92 +143,104 @@ class _BannerItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        CachedNetworkImage(
-          imageUrl: banner.imageUrl,
-          fit: BoxFit.cover,
-          placeholder: (context, url) => Shimmer.fromColors(
-            baseColor: context.isDarkMode ? AppColors.shimmerBaseDark : AppColors.shimmerBase,
-            highlightColor: context.isDarkMode ? AppColors.shimmerHighlightDark : AppColors.shimmerHighlight,
-            child: Container(color: Colors.white),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: context.surfaceColor,
+        boxShadow: [
+          BoxShadow(
+            color: context.shadowColor,
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
-          errorWidget: (context, url, error) {
-            // Show colored placeholder with title when image fails
-            return Container(
-              color: context.surfaceHighColor,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.image_not_supported_outlined,
-                    color: context.tertiaryTextColor,
-                    size: 48,
-                  ),
-                  if (banner.title != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      banner.title!,
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: context.primaryTextColor,
-                      ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          CachedNetworkImage(
+            imageUrl: banner.imageUrl,
+            fit: BoxFit.cover,
+            placeholder: (context, url) => Shimmer.fromColors(
+              baseColor: context.isDarkMode ? AppColors.shimmerBaseDark : AppColors.shimmerBase,
+              highlightColor: context.isDarkMode ? AppColors.shimmerHighlightDark : AppColors.shimmerHighlight,
+              child: Container(color: Colors.white),
+            ),
+            errorWidget: (context, url, error) {
+              return Container(
+                color: context.surfaceHighColor,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.image_not_supported_outlined,
+                      color: context.tertiaryTextColor,
+                      size: 48,
                     ),
+                    if (banner.title != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        banner.title!,
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: context.primaryTextColor,
+                        ),
+                      ),
+                    ],
                   ],
-                ],
-              ),
-            );
-          },
-        ),
-        if (banner.title != null || banner.subtitle != null)
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black.withValues(alpha: 0.8),
+                ),
+              );
+            },
+          ),
+          if (banner.title != null || banner.subtitle != null)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.8),
+                    ],
+                    stops: const [0.0, 1.0],
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (banner.title != null)
+                      Text(
+                        banner.title!,
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                          letterSpacing: -0.3,
+                        ),
+                      ),
+                    if (banner.subtitle != null)
+                      Text(
+                        banner.subtitle!,
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white70,
+                        ),
+                      ),
                   ],
-                  stops: const [0.0, 1.0],
                 ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (banner.title != null)
-                    Text(
-                      banner.title!,
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                        letterSpacing: -0.3,
-                      ),
-                    ),
-                  if (banner.subtitle != null)
-                    Text(
-                      banner.subtitle!,
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.white70,
-                        letterSpacing: -0.1,
-                      ),
-                    ),
-                ],
-              ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 }

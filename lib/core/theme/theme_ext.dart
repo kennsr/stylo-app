@@ -44,4 +44,7 @@ extension ThemeContextExt on BuildContext {
   Color get primaryColor => AppColors.primary;
   Color get primaryLightColor => AppColors.primaryLight;
   Color get primarySubtleColor => AppColors.primarySubtle;
+  
+  // Success
+  Color get accentGreen => AppColors.success;
 }

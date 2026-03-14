@@ -76,9 +76,9 @@ class _LoginPageState extends State<LoginPage> {
                      SizedBox(height: 32),
                     Text(
                       'Masuk',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.playfairDisplay(
                         fontSize: 28,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.bold,
                         color: context.primaryTextColor,
                         letterSpacing: -0.5,
                       ),
@@ -86,7 +86,7 @@ class _LoginPageState extends State<LoginPage> {
                      SizedBox(height: 6),
                     Text(
                       'Selamat datang kembali',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w400,
                         color: context.secondaryTextColor,

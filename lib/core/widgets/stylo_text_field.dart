@@ -60,11 +60,10 @@ class _StyloTextFieldState extends State<StyloTextField> {
       children: [
         Text(
           widget.label,
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w500,
             color: context.primaryTextColor,
-            letterSpacing: -0.1,
           ),
         ),
         const SizedBox(height: 8),
@@ -79,18 +78,16 @@ class _StyloTextFieldState extends State<StyloTextField> {
           readOnly: widget.readOnly,
           maxLines: widget.obscureText ? 1 : widget.maxLines,
           focusNode: widget.focusNode,
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w400,
             color: context.primaryTextColor,
-            letterSpacing: -0.1,
           ),
           decoration: InputDecoration(
             hintText: widget.hint,
-            hintStyle: GoogleFonts.poppins(
+            hintStyle: GoogleFonts.inter(
               fontSize: 14,
               color: context.tertiaryTextColor,
-              letterSpacing: -0.1,
             ),
             filled: true,
             fillColor: context.surfaceHighColor,
@@ -99,23 +96,23 @@ class _StyloTextFieldState extends State<StyloTextField> {
               vertical: 14,
             ),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide.none,
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide.none,
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(10),
               borderSide: const BorderSide(color: AppColors.primary, width: 2),
             ),
             errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(10),
               borderSide: const BorderSide(color: AppColors.error, width: 1.5),
             ),
             focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(10),
               borderSide: const BorderSide(color: AppColors.error, width: 2),
             ),
             prefixIcon: widget.prefixIcon != null
@@ -150,7 +147,7 @@ class _StyloTextFieldState extends State<StyloTextField> {
                         onPressed: widget.onSuffixTap,
                       )
                     : null),
-            errorStyle: GoogleFonts.poppins(
+            errorStyle: GoogleFonts.inter(
               fontSize: 12,
               color: AppColors.error,
             ),

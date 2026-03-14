@@ -6,6 +6,6 @@ class AuthHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const StyloLogo(size: 64);
+    return const StyloLogo(size: 100);
   }
 }
