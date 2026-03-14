@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/api_constants.dart';
 import '../constants/app_constants.dart';
@@ -145,6 +146,36 @@ class ApiClient {
       final response = await httpClient
           .delete(_buildUri(path), headers: _headers)
           .timeout(ApiConstants.receiveTimeout);
+      return _handleResponse(response);
+    } on ServerException {
+      rethrow;
+    } on AuthException {
+      rethrow;
+    } catch (e) {
+      throw NetworkException(message: e.toString());
+    }
+  }
+
+  Future<Map<String, dynamic>> uploadMultipart(
+    String path, {
+    required List<MultipartFile> files,
+    Map<String, String>? fields,
+  }) async {
+    if (EnvConfig.useMock) {
+      await Future.delayed(const Duration(milliseconds: 800));
+      return MockApiData.getMockResponse(path, method: 'POST');
+    }
+    try {
+      final request = http.MultipartRequest(
+        'POST',
+        _buildUri(path),
+      );
+      request.headers.addAll(_headers);
+      request.files.addAll(files);
+      fields?.forEach((key, value) => request.fields[key] = value);
+      
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
       return _handleResponse(response);
     } on ServerException {
       rethrow;

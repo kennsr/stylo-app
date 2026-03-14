@@ -2,48 +2,45 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/stylo_svg_icon.dart';
 import '../../../../core/theme/theme_ext.dart';
 
 class EmptyCartView extends StatelessWidget {
-   const EmptyCartView({super.key});
+  const EmptyCartView({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding:  EdgeInsets.all(40),
+        padding: const EdgeInsets.all(40),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-             Icon(
-              Icons.shopping_bag_outlined,
-              size: 80,
-              color: context.secondaryTextColor,
-            ),
-             SizedBox(height: 24),
+            const StyloLogo(size: 80),
+            const SizedBox(height: 24),
             Text(
-              'Keranjang Kosong',
+              'Keranjang Masih Kosong 🛒',
               style: GoogleFonts.poppins(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
                 color: context.primaryTextColor,
               ),
             ),
-             SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
-              'Belum ada produk di keranjang kamu',
+              'Yuk, isi keranjang dengan outfit kece!',
               style: GoogleFonts.poppins(
                 fontSize: 14,
                 color: context.secondaryTextColor,
               ),
               textAlign: TextAlign.center,
             ),
-             SizedBox(height: 32),
+            const SizedBox(height: 32),
             OutlinedButton(
               onPressed: () => context.go('/home'),
               style: OutlinedButton.styleFrom(
-                side:  BorderSide(color: AppColors.accent, width: 1.5),
-                padding:  EdgeInsets.symmetric(
+                side: const BorderSide(color: AppColors.accent, width: 1.5),
+                padding: const EdgeInsets.symmetric(
                   horizontal: 36,
                   vertical: 14,
                 ),
@@ -52,7 +49,7 @@ class EmptyCartView extends StatelessWidget {
                 ),
               ),
               child: Text(
-                'Mulai Belanja',
+                'Yuk, Belanja!',
                 style: GoogleFonts.poppins(
                   fontWeight: FontWeight.w600,
                   fontSize: 14,

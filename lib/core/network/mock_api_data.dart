@@ -2245,6 +2245,23 @@ class MockApiData {
       };
     }
 
+    // Profile avatar upload
+    if (path == '${ApiConstants.profile}/avatar') {
+      if (method == 'POST') {
+        return {
+          'message': 'Avatar uploaded successfully',
+          'data': {
+            'id': 'user_rizki_01',
+            'email': 'rizki.pratama@gmail.com',
+            'name': 'Rizki Pratama',
+            'phone': '081234567890',
+            'avatar_url': 'https://i.pravatar.cc/150?u=rizki&updated=${DateTime.now().millisecondsSinceEpoch}',
+            'style_preferences': ['Casual', 'Streetwear'],
+          },
+        };
+      }
+    }
+
     if (path == '${ApiConstants.profile}/style-preferences') {
       // Handle PUT request for updating style preferences
       if (method == 'PUT') {

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/banner.dart' as entity;
@@ -29,13 +30,13 @@ class _BannerCarouselState extends State<BannerCarousel> {
   }
 
   void _startAutoScroll() {
-    _timer = Timer.periodic( Duration(seconds: 3), (_) {
+    _timer = Timer.periodic(const Duration(seconds: 4), (_) {
       if (!mounted) return;
       final nextPage = (_currentPage + 1) % widget.banners.length;
       _pageController.animateToPage(
         nextPage,
-        duration:  Duration(milliseconds: 400),
-        curve: Curves.easeInOut,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOutCubic,
       );
     });
   }
@@ -71,21 +72,21 @@ class _BannerCarouselState extends State<BannerCarousel> {
           ),
         ),
         if (widget.banners.length > 1) ...[
-           SizedBox(height: 10),
+          const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(
               widget.banners.length,
               (index) => AnimatedContainer(
-                duration:  Duration(milliseconds: 250),
-                margin:  EdgeInsets.symmetric(horizontal: 3),
-                width: _currentPage == index ? 18 : 6,
-                height: 6,
+                duration: const Duration(milliseconds: 250),
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                width: _currentPage == index ? 24 : 8,
+                height: 8,
                 decoration: BoxDecoration(
                   color: _currentPage == index
-                      ? AppColors.accent
+                      ? AppColors.primary
                       : context.dividerColor,
-                  borderRadius: BorderRadius.circular(3),
+                  borderRadius: BorderRadius.circular(4),
                 ),
               ),
             ),
@@ -100,29 +101,29 @@ class _BannerCarouselState extends State<BannerCarousel> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Shimmer.fromColors(
-          baseColor: context.isDarkMode ? AppColors.darkDivider : AppColors.shimmerBase,
-          highlightColor: context.isDarkMode ? AppColors.darkSurface : AppColors.shimmerHighlight,
+          baseColor: context.isDarkMode ? AppColors.shimmerBaseDark : AppColors.shimmerBase,
+          highlightColor: context.isDarkMode ? AppColors.shimmerHighlightDark : AppColors.shimmerHighlight,
           child: Container(
             height: 200,
-            margin:  EdgeInsets.symmetric(horizontal: 16),
+            margin: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
             ),
           ),
         ),
-         SizedBox(height: 10),
+        const SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(
             3,
             (index) => Container(
-              margin:  EdgeInsets.symmetric(horizontal: 3),
-              width: 6,
-              height: 6,
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              width: 8,
+              height: 8,
               decoration: BoxDecoration(
                 color: context.dividerColor,
-                borderRadius: BorderRadius.circular(3),
+                borderRadius: BorderRadius.circular(4),
               ),
             ),
           ),
@@ -139,78 +140,92 @@ class _BannerItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin:  EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: context.surfaceColor,
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          CachedNetworkImage(
-            imageUrl: banner.imageUrl,
-            fit: BoxFit.cover,
-            placeholder: (context, url) => Shimmer.fromColors(
-              baseColor: context.isDarkMode ? AppColors.darkDivider : AppColors.shimmerBase,
-              highlightColor: context.isDarkMode ? AppColors.darkSurface : AppColors.shimmerHighlight,
-              child: Container(color: Colors.white),
-            ),
-            errorWidget: (context, url, error) => Container(
-              color: context.surfaceColor,
-              child:  Icon(
-                Icons.image_not_supported_outlined,
-                color: context.secondaryTextColor,
-                size: 48,
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        CachedNetworkImage(
+          imageUrl: banner.imageUrl,
+          fit: BoxFit.cover,
+          placeholder: (context, url) => Shimmer.fromColors(
+            baseColor: context.isDarkMode ? AppColors.shimmerBaseDark : AppColors.shimmerBase,
+            highlightColor: context.isDarkMode ? AppColors.shimmerHighlightDark : AppColors.shimmerHighlight,
+            child: Container(color: Colors.white),
+          ),
+          errorWidget: (context, url, error) {
+            // Show colored placeholder with title when image fails
+            return Container(
+              color: context.surfaceHighColor,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.image_not_supported_outlined,
+                    color: context.tertiaryTextColor,
+                    size: 48,
+                  ),
+                  if (banner.title != null) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      banner.title!,
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: context.primaryTextColor,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            );
+          },
+        ),
+        if (banner.title != null || banner.subtitle != null)
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withValues(alpha: 0.8),
+                  ],
+                  stops: const [0.0, 1.0],
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (banner.title != null)
+                    Text(
+                      banner.title!,
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                  if (banner.subtitle != null)
+                    Text(
+                      banner.subtitle!,
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.white70,
+                        letterSpacing: -0.1,
+                      ),
+                    ),
+                ],
               ),
             ),
           ),
-          if (banner.title != null || banner.subtitle != null)
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                padding:  EdgeInsets.fromLTRB(16, 32, 16, 16),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withValues(alpha: 0.7),
-                    ],
-                    stops: const [0.0, 1.0],
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (banner.title != null)
-                      Text(
-                        banner.title!,
-                        style:  TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    if (banner.subtitle != null)
-                      Text(
-                        banner.subtitle!,
-                        style:  TextStyle(
-                          color: Colors.white70,
-                          fontSize: 13,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-        ],
-      ),
+      ],
     );
   }
 }

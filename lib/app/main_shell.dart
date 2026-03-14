@@ -23,7 +23,7 @@ class _TabData {
 
 const List<_TabData> _kTabs = [
   _TabData(
-    label: 'Beranda',
+    label: 'Home',
     icon: Icons.home_outlined,
     activeIcon: Icons.home_rounded,
   ),
@@ -72,26 +72,26 @@ class _MainShellState extends State<MainShell> with TickerProviderStateMixin {
       _kTabs.length,
       (_) => AnimationController(
         vsync: this,
-        duration: const Duration(milliseconds: 400),
+        duration: const Duration(milliseconds: 300),
       ),
     );
 
-    // Spring-like bounce: up → overshoot back → settle
+    // Smooth spring-like animation
     _scaleAnims = _scaleControllers.map((ctrl) {
       return TweenSequence<double>([
         TweenSequenceItem(
-          tween: Tween(begin: 1.0, end: 1.32),
-          weight: 28,
-        ),
-        TweenSequenceItem(
-          tween: Tween(begin: 1.32, end: 0.88),
+          tween: Tween(begin: 1.0, end: 1.2),
           weight: 30,
         ),
         TweenSequenceItem(
-          tween: Tween(begin: 0.88, end: 1.0),
-          weight: 42,
+          tween: Tween(begin: 1.2, end: 0.95),
+          weight: 35,
         ),
-      ]).animate(CurvedAnimation(parent: ctrl, curve: Curves.easeInOut));
+        TweenSequenceItem(
+          tween: Tween(begin: 0.95, end: 1.0),
+          weight: 35,
+        ),
+      ]).animate(CurvedAnimation(parent: ctrl, curve: Curves.easeInOutCubic));
     }).toList();
   }
 
@@ -117,6 +117,7 @@ class _MainShellState extends State<MainShell> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       body: widget.navigationShell,
+      extendBody: false,
       bottomNavigationBar: BlocBuilder<CartBloc, CartState>(
         builder: (context, cartState) {
           final cartCount =
@@ -152,20 +153,27 @@ class _BottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: context.backgroundColor,
+        color: context.surfaceColor,
         border: Border(
           top: BorderSide(color: context.dividerColor, width: 1),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: context.shadowColor,
+            blurRadius: 8,
+            offset: const Offset(0, -2),
+          ),
+        ],
       ),
       child: SafeArea(
         top: false,
         child: SizedBox(
-          height: 64,
+          height: 80,
           child: Row(
             children: List.generate(_kTabs.length, (index) {
               final tab = _kTabs[index];
               final isActive = index == currentIndex;
-              final badge = (index == 2 && cartCount > 0) ? cartCount : null;
+              final badge = (index == 1 && cartCount > 0) ? cartCount : null;
 
               return Expanded(
                 child: _NavItem(
@@ -203,41 +211,54 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isActive ? AppColors.accent : context.secondaryTextColor;
+    final color = isActive ? AppColors.primary : context.tertiaryTextColor;
 
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
-        height: 64,
+        height: 80,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Animated icon with pill background
-            ScaleTransition(
-              scale: scaleAnim,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 260),
-                curve: Curves.easeOut,
-                width: isActive ? 46 : 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  color: isActive
-                      ? AppColors.accent.withValues(alpha: 0.12)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(14),
+            // Stack to keep icon position stable during animation
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                // Background pill (only visible when active)
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOut,
+                  width: isActive ? 56 : 0,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    gradient: isActive
+                        ? const LinearGradient(
+                            colors: [
+                              AppColors.primaryGradientStart,
+                              AppColors.primaryGradientEnd,
+                            ],
+                          )
+                        : null,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
-                child: Center(child: _buildIcon(color)),
-              ),
+                // Icon (always centered)
+                ScaleTransition(
+                  scale: scaleAnim,
+                  child: _buildIcon(color),
+                ),
+              ],
             ),
-            const SizedBox(height: 3),
+            const SizedBox(height: 4),
             // Animated label
             AnimatedDefaultTextStyle(
               duration: const Duration(milliseconds: 200),
               style: GoogleFonts.poppins(
-                fontSize: 10,
+                fontSize: 11,
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-                color: color,
+                color: isActive ? AppColors.primary : color,
+                letterSpacing: -0.2,
               ),
               child: Text(tab.label),
             ),
@@ -250,13 +271,15 @@ class _NavItem extends StatelessWidget {
   Widget _buildIcon(Color color) {
     final icon = Icon(
       isActive ? tab.activeIcon : tab.icon,
-      size: 22,
+      size: 24,
       color: color,
     );
 
     if (badge != null) {
       return Badge(
         label: Text('$badge'),
+        backgroundColor: AppColors.badge,
+        textColor: Colors.white,
         child: icon,
       );
     }

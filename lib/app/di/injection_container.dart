@@ -110,6 +110,7 @@ import '../../features/profile/domain/usecases/get_profile_usecase.dart';
 import '../../features/profile/domain/usecases/update_profile_usecase.dart';
 import '../../features/profile/domain/usecases/get_style_preferences_usecase.dart';
 import '../../features/profile/domain/usecases/update_style_preferences_usecase.dart';
+import '../../features/profile/domain/usecases/upload_avatar_usecase.dart';
 import '../../features/profile/presentation/bloc/profile_bloc.dart';
 
 // Onboarding
@@ -361,12 +362,14 @@ Future<void> init() async {
   sl.registerLazySingleton(() => UpdateProfileUseCase(sl()));
   sl.registerLazySingleton(() => GetStylePreferencesUseCase(sl()));
   sl.registerLazySingleton(() => UpdateStylePreferencesUseCase(sl()));
+  sl.registerLazySingleton(() => UploadAvatarUseCase(sl()));
   sl.registerFactory(
     () => ProfileBloc(
       getProfileUseCase: sl(),
       updateProfileUseCase: sl(),
       getStylePreferencesUseCase: sl(),
       updateStylePreferencesUseCase: sl(),
+      uploadAvatarUseCase: sl(),
     ),
   );
 
@@ -376,6 +379,7 @@ Future<void> init() async {
       updateProfileUseCase: sl(),
       updateStylePrefsUseCase: sl(),
       saveFitProfileUseCase: sl(),
+      uploadAvatarUseCase: sl(),
       prefs: sl(),
     ),
   );

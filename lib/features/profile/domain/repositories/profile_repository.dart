@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/either.dart';
 import '../../../../features/auth/domain/entities/user.dart';
@@ -9,6 +11,7 @@ abstract class ProfileRepository {
     required String name,
     String? phone,
   });
+  Future<Either<Failure, User>> uploadAvatar(File avatarFile);
   Future<Either<Failure, List<StylePreference>>> getStylePreferences();
   Future<Either<Failure, void>> updateStylePreferences(
       List<String> preferenceIds);

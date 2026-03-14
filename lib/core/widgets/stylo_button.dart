@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_colors.dart';
 
-class StyloButton extends StatelessWidget {
+class StyloButton extends StatefulWidget {
   final String label;
   final VoidCallback? onPressed;
   final bool isLoading;
@@ -9,7 +10,7 @@ class StyloButton extends StatelessWidget {
   final _ButtonVariant _variant;
   final IconData? icon;
 
-   const StyloButton({
+  const StyloButton({
     super.key,
     required this.label,
     this.onPressed,
@@ -18,7 +19,7 @@ class StyloButton extends StatelessWidget {
     this.icon,
   }) : _variant = _ButtonVariant.primary;
 
-   const StyloButton.secondary({
+  const StyloButton.secondary({
     super.key,
     required this.label,
     this.onPressed,
@@ -27,7 +28,7 @@ class StyloButton extends StatelessWidget {
     this.icon,
   }) : _variant = _ButtonVariant.secondary;
 
-   const StyloButton.text({
+  const StyloButton.text({
     super.key,
     required this.label,
     this.onPressed,
@@ -37,6 +38,56 @@ class StyloButton extends StatelessWidget {
   }) : _variant = _ButtonVariant.text;
 
   @override
+  State<StyloButton> createState() => _StyloButtonState();
+}
+
+class _StyloButtonState extends State<StyloButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+  bool _isPressed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 150),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.96).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onTapDown(TapDownDetails details) {
+    if (widget.onPressed != null && !widget.isLoading) {
+      setState(() => _isPressed = true);
+      _controller.forward();
+    }
+  }
+
+  void _onTapUp(TapUpDetails details) {
+    if (_isPressed) {
+      setState(() => _isPressed = false);
+      _controller.reverse();
+      widget.onPressed?.call();
+    }
+  }
+
+  void _onTapCancel() {
+    if (_isPressed) {
+      setState(() => _isPressed = false);
+      _controller.reverse();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final loadingIndicator = SizedBox(
       width: 20,
@@ -44,86 +95,137 @@ class StyloButton extends StatelessWidget {
       child: CircularProgressIndicator.adaptive(
         strokeWidth: 2,
         valueColor: AlwaysStoppedAnimation<Color>(
-          _variant == _ButtonVariant.primary
+          widget._variant == _ButtonVariant.primary
               ? Colors.white
-              : AppColors.accent,
+              : AppColors.primary,
         ),
       ),
     );
 
-    final content = isLoading
+    final content = widget.isLoading
         ? loadingIndicator
-        : icon != null
+        : widget.icon != null
             ? Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(icon, size: 18),
-                   SizedBox(width: 8),
-                  Text(label),
+                  Icon(widget.icon, size: 18),
+                  const SizedBox(width: 8),
+                  Text(
+                    widget.label,
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
                 ],
               )
-            : Text(label);
+            : Text(
+                widget.label,
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.3,
+                ),
+              );
 
     Widget button;
-    switch (_variant) {
+    switch (widget._variant) {
       case _ButtonVariant.primary:
-        button = SizedBox(
-          height: 52,
-          child: ElevatedButton(
-            onPressed: isLoading ? null : onPressed,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.accent,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              disabledBackgroundColor: AppColors.accent.withValues(alpha: 0.6),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              textStyle:  TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.5,
+        button = GestureDetector(
+          onTapDown: widget.onPressed != null && !widget.isLoading ? _onTapDown : null,
+          onTapUp: widget.onPressed != null && !widget.isLoading ? _onTapUp : null,
+          onTapCancel: widget.onPressed != null && !widget.isLoading ? _onTapCancel : null,
+          child: ScaleTransition(
+            scale: _scaleAnimation,
+            child: SizedBox(
+              height: 48,
+              child: ElevatedButton(
+                onPressed: widget.isLoading ? null : widget.onPressed,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  elevation: widget.onPressed != null && !widget.isLoading ? 2 : 0,
+                  shadowColor: widget.onPressed != null && !widget.isLoading
+                      ? AppColors.primary.withValues(alpha: 0.4)
+                      : Colors.transparent,
+                  disabledBackgroundColor:
+                      AppColors.primary.withValues(alpha: 0.5),
+                  disabledForegroundColor: Colors.white.withValues(alpha: 0.7),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Ink(
+                  decoration: BoxDecoration(
+                    gradient: (_isPressed && widget.onPressed != null && !widget.isLoading)
+                        ? null
+                        : LinearGradient(
+                            colors: [
+                              AppColors.primaryGradientStart,
+                              AppColors.primaryGradientEnd,
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(child: content),
+                ),
               ),
             ),
-            child: content,
           ),
         );
       case _ButtonVariant.secondary:
-        button = SizedBox(
-          height: 52,
-          child: OutlinedButton(
-            onPressed: isLoading ? null : onPressed,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.accent,
-              backgroundColor: Colors.white,
-              side:  BorderSide(color: AppColors.accent, width: 1.5),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              textStyle:  TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.5,
+        button = GestureDetector(
+          onTapDown: _onTapDown,
+          onTapUp: _onTapUp,
+          onTapCancel: _onTapCancel,
+          child: ScaleTransition(
+            scale: _scaleAnimation,
+            child: SizedBox(
+              height: 48,
+              child: OutlinedButton(
+                onPressed: widget.isLoading ? null : widget.onPressed,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  backgroundColor: Colors.transparent,
+                  side: const BorderSide(color: AppColors.primary, width: 1.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: content,
               ),
             ),
-            child: content,
           ),
         );
       case _ButtonVariant.text:
-        button = TextButton(
-          onPressed: isLoading ? null : onPressed,
-          style: TextButton.styleFrom(
-            foregroundColor: AppColors.accent,
-            textStyle:  TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
+        button = GestureDetector(
+          onTapDown: _onTapDown,
+          onTapUp: _onTapUp,
+          onTapCancel: _onTapCancel,
+          child: ScaleTransition(
+            scale: _scaleAnimation,
+            child: TextButton(
+              onPressed: widget.isLoading ? null : widget.onPressed,
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                textStyle: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: content,
             ),
           ),
-          child: content,
         );
     }
 
-    if (isFullWidth) {
+    if (widget.isFullWidth) {
       return SizedBox(width: double.infinity, child: button);
     }
     return button;

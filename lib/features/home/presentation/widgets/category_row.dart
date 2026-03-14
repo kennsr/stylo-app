@@ -9,14 +9,49 @@ import '../../../../core/theme/theme_ext.dart';
 class CategoryRow extends StatefulWidget {
   final List<Category> categories;
 
-   const CategoryRow({super.key, required this.categories});
+  const CategoryRow({super.key, required this.categories});
 
   @override
   State<CategoryRow> createState() => _CategoryRowState();
 }
 
-class _CategoryRowState extends State<CategoryRow> {
+class _CategoryRowState extends State<CategoryRow>
+    with TickerProviderStateMixin {
   String? _selectedId;
+  late AnimationController _controller;
+  final Map<int, Animation<double>> _animations = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Animation<double> _getAnimation(int index) {
+    if (!_animations.containsKey(index)) {
+      _animations[index] = Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(
+          parent: _controller,
+          curve: Interval(
+            0.0 + (index * 0.1),
+            0.8 + (index * 0.1),
+            curve: Curves.easeOutCubic,
+          ),
+        ),
+      );
+    }
+    return _animations[index]!;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,23 +63,41 @@ class _CategoryRowState extends State<CategoryRow> {
       height: 36,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding:  EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: widget.categories.length,
-        separatorBuilder: (context, index) =>  SizedBox(width: 8),
+        separatorBuilder: (context, index) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final category = widget.categories[index];
           final isSelected = _selectedId == category.id;
-          return _CategoryChip(
-            category: category,
-            isSelected: isSelected,
-            onTap: () {
-              setState(() {
-                _selectedId = isSelected ? null : category.id;
-              });
-              context.go(
-                '/products?category=${Uri.encodeComponent(category.name)}',
-              );
-            },
+          final animation = _getAnimation(index);
+
+          return FadeTransition(
+            opacity: animation,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: Offset(0.2 + (index * 0.05), 0),
+                end: Offset.zero,
+              ).animate(CurvedAnimation(
+                parent: _controller,
+                curve: Interval(
+                  0.0 + (index * 0.1),
+                  0.8 + (index * 0.1),
+                  curve: Curves.easeOutCubic,
+                ),
+              )),
+              child: _CategoryChip(
+                category: category,
+                isSelected: isSelected,
+                onTap: () {
+                  setState(() {
+                    _selectedId = isSelected ? null : category.id;
+                  });
+                  context.go(
+                    '/products?category=${Uri.encodeComponent(category.name)}',
+                  );
+                },
+              ),
+            ),
           );
         },
       ),
@@ -56,9 +109,9 @@ class _CategoryRowState extends State<CategoryRow> {
       height: 36,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding:  EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: 5,
-        separatorBuilder: (context, index) =>  SizedBox(width: 8),
+        separatorBuilder: (context, index) => const SizedBox(width: 8),
         itemBuilder: (context, index) => Shimmer.fromColors(
           baseColor: context.isDarkMode ? AppColors.darkDivider : AppColors.shimmerBase,
           highlightColor: context.isDarkMode ? AppColors.darkSurface : AppColors.shimmerHighlight,
@@ -92,9 +145,9 @@ class _CategoryChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration:  Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 200),
         height: 36,
-        padding:  EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.accent : context.backgroundColor,
           borderRadius: BorderRadius.circular(20),

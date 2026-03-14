@@ -84,7 +84,7 @@ class _SearchPageState extends State<SearchPage> {
               color: context.primaryTextColor,
             ),
             decoration: InputDecoration(
-              hintText: 'Cari produk favoritmu...',
+              hintText: 'Mau cari outfit apa?',
               hintStyle: GoogleFonts.poppins(
                 fontSize: 14,
                 color: context.secondaryTextColor,
@@ -164,7 +164,7 @@ class _SearchPageState extends State<SearchPage> {
           ),
            SizedBox(height: 20),
           Text(
-            'Ketik untuk mencari...',
+            'Mau cari apa hari ini?',
             style: GoogleFonts.poppins(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -173,7 +173,7 @@ class _SearchPageState extends State<SearchPage> {
           ),
            SizedBox(height: 6),
           Text(
-            'Temukan pakaian impianmu di sini',
+            'Yuk, temukan outfit impianmu di sini ✨',
             style: GoogleFonts.poppins(
               fontSize: 13,
               color: context.secondaryTextColor,
@@ -204,7 +204,7 @@ class _SearchPageState extends State<SearchPage> {
           ),
            SizedBox(height: 20),
           Text(
-            'Produk tidak ditemukan',
+            'Hmm, nggak ketemu 😅',
             style: GoogleFonts.poppins(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -213,7 +213,7 @@ class _SearchPageState extends State<SearchPage> {
           ),
            SizedBox(height: 6),
           Text(
-            'Coba kata kunci yang berbeda',
+            'Coba pakai kata kunci lain yuk',
             style: GoogleFonts.poppins(
               fontSize: 13,
               color: context.secondaryTextColor,

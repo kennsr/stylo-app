@@ -28,7 +28,6 @@ import '../features/product/presentation/bloc/product_list_bloc.dart';
 import '../features/product/presentation/bloc/product_detail_bloc.dart';
 import '../features/product/presentation/pages/product_list_page.dart';
 import '../features/product/presentation/pages/product_detail_page.dart';
-import '../features/product/presentation/pages/search_page.dart';
 
 // AI Try-On
 import '../features/ai_try_on/presentation/bloc/ai_try_on_bloc.dart';
@@ -90,18 +89,32 @@ class _AuthRouterNotifier extends ChangeNotifier {
   }
 }
 
-// ── Fade transition helper ────────────────────────────────────────────────────
+// ── Smooth page transitions ───────────────────────────────────────────────────
 
 Page<void> _fadePage(GoRouterState state, Widget child) {
   return CustomTransitionPage<void>(
     key: state.pageKey,
     child: child,
-    transitionDuration: const Duration(milliseconds: 280),
-    reverseTransitionDuration: const Duration(milliseconds: 200),
-    transitionsBuilder: (_, animation, _, child) => FadeTransition(
-      opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
-      child: child,
-    ),
+    transitionDuration: const Duration(milliseconds: 350),
+    reverseTransitionDuration: const Duration(milliseconds: 300),
+    transitionsBuilder: (_, animation, secondaryAnimation, child) {
+      return FadeTransition(
+        opacity: CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutCubic,
+        ),
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 0.02),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+          )),
+          child: child,
+        ),
+      );
+    },
   );
 }
 
@@ -374,22 +387,6 @@ class _StyloAppState extends State<StyloApp> {
                       create: (_) => di.sl<NotificationsBloc>()
                         ..add(const NotificationsFetch()),
                       child: const NotificationsPage(),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            // Cari branch
-            StatefulShellBranch(
-              routes: [
-                GoRoute(
-                  path: '/search',
-                  pageBuilder: (context, state) => _fadePage(
-                    state,
-                    BlocProvider(
-                      create: (_) => di.sl<ProductListBloc>(),
-                      child: const SearchPage(),
                     ),
                   ),
                 ),

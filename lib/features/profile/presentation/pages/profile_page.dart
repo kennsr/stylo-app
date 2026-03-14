@@ -47,7 +47,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:  Text('Profil'),
+        title:  Text('Profil Kamu'),
         centerTitle: true,
       ),
       body: BlocBuilder<ProfileBloc, ProfileState>(
@@ -71,7 +71,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ElevatedButton(
                       onPressed: () =>
                           context.read<ProfileBloc>().add( ProfileFetch()),
-                      child:  Text('Coba Lagi'),
+                      child:  Text('Coba Lagi Dong'),
                     ),
                   ],
                 ),

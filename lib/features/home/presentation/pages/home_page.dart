@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/stylo_svg_icon.dart';
 import '../../../cart/presentation/bloc/cart_bloc.dart';
 import '../../../cart/presentation/bloc/cart_state.dart';
 import '../bloc/home_bloc.dart';
@@ -18,17 +19,25 @@ import '../widgets/featured_products_grid.dart';
 import '../../../../core/theme/theme_ext.dart';
 
 class HomePage extends StatefulWidget {
-   const HomePage({super.key});
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
-    context.read<HomeBloc>().add( HomeFetchData());
+    context.read<HomeBloc>().add(HomeFetchData());
   }
 
   Future<void> _onRefresh() async {
@@ -60,35 +69,65 @@ class _HomePageState extends State<HomePage> {
 
           return RefreshIndicator(
             onRefresh: _onRefresh,
-            color: AppColors.accent,
-            child: SingleChildScrollView(
-              physics:  AlwaysScrollableScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildSearchBar(context),
-                   SizedBox(height: 16),
-                  isLoading
-                      ? _buildBannerShimmer()
-                      : BannerCarousel(banners: banners),
-                   SizedBox(height: 24),
-                  _buildSectionHeader('Kategori'),
-                   SizedBox(height: 12),
-                  isLoading
-                      ? _buildCategoryShimmer()
-                      : CategoryRow(categories: categories),
-                   SizedBox(height: 24),
-                  _buildSectionHeader(
-                    'Rekomendasi',
-                    onSeeAll: () => context.push('/products'),
+            color: AppColors.primary,
+            child: CustomScrollView(
+              slivers: [
+                // Search bar
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                    child: _buildInlineSearchBar(context),
                   ),
-                   SizedBox(height: 12),
-                  isLoading
-                      ?  FeaturedProductsGrid(products: [])
-                      : FeaturedProductsGrid(products: products),
-                   SizedBox(height: 32),
-                ],
-              ),
+                ),
+                // Content
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: isLoading
+                        ? _buildBannerShimmer()
+                        : BannerCarousel(banners: banners),
+                  ),
+                ),
+                // Categories section
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionHeader('Kategori Kekinian'),
+                        const SizedBox(height: 12),
+                        isLoading
+                            ? _buildCategoryShimmer()
+                            : CategoryRow(categories: categories),
+                      ],
+                    ),
+                  ),
+                ),
+                // Recommended products section
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionHeader(
+                          'Rekomendasi Buat Kamu',
+                          onSeeAll: () => context.push('/products'),
+                        ),
+                        const SizedBox(height: 12),
+                        isLoading
+                            ? const FeaturedProductsGrid(products: [])
+                            : FeaturedProductsGrid(products: products),
+                      ],
+                    ),
+                  ),
+                ),
+                // Bottom padding for navigation
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: 32),
+                ),
+              ],
             ),
           );
         },
@@ -98,23 +137,18 @@ class _HomePageState extends State<HomePage> {
 
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
-      backgroundColor: context.backgroundColor,
+      backgroundColor: context.surfaceColor,
       elevation: 0,
-      scrolledUnderElevation: 0.5,
-      shadowColor: context.dividerColor,
-      centerTitle: false,
-      title: Text(
-        'stylo',
-        style: GoogleFonts.poppins(
-          fontSize: 22,
-          fontWeight: FontWeight.w800,
-          color: AppColors.accent,
-          letterSpacing: -0.5,
-        ),
+      scrolledUnderElevation: 0,
+      shadowColor: Colors.transparent,
+      surfaceTintColor: Colors.transparent,
+      title: const Padding(
+        padding: EdgeInsets.only(left: 16),
+        child: StyloLogo(size: 36),
       ),
       actions: [
         IconButton(
-          icon:  Icon(
+          icon: Icon(
             Icons.notifications_outlined,
             color: context.primaryTextColor,
           ),
@@ -129,7 +163,7 @@ class _HomePageState extends State<HomePage> {
             return Stack(
               children: [
                 IconButton(
-                  icon:  Icon(
+                  icon: Icon(
                     Icons.shopping_bag_outlined,
                     color: context.primaryTextColor,
                   ),
@@ -138,23 +172,23 @@ class _HomePageState extends State<HomePage> {
                 ),
                 if (itemCount > 0)
                   Positioned(
-                    right: 6,
-                    top: 6,
+                    right: 8,
+                    top: 8,
                     child: Container(
-                      padding:  EdgeInsets.all(2),
-                      constraints:  BoxConstraints(
-                        minWidth: 16,
-                        minHeight: 16,
+                      padding: const EdgeInsets.all(4),
+                      constraints: const BoxConstraints(
+                        minWidth: 18,
+                        minHeight: 18,
                       ),
-                      decoration:  BoxDecoration(
-                        color: AppColors.accent,
+                      decoration: const BoxDecoration(
+                        color: AppColors.badge,
                         shape: BoxShape.circle,
                       ),
                       child: Text(
                         itemCount > 99 ? '99+' : '$itemCount',
-                        style:  TextStyle(
+                        style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 9,
+                          fontSize: 10,
                           fontWeight: FontWeight.w700,
                         ),
                         textAlign: TextAlign.center,
@@ -165,40 +199,45 @@ class _HomePageState extends State<HomePage> {
             );
           },
         ),
-         SizedBox(width: 4),
+        const SizedBox(width: 4),
       ],
     );
   }
 
-  Widget _buildSearchBar(BuildContext context) {
-    return GestureDetector(
-      onTap: () => context.go('/search'),
-      child: Container(
-        margin:  EdgeInsets.fromLTRB(16, 12, 16, 0),
-        height: 46,
-        decoration: BoxDecoration(
-          color: context.surfaceColor,
-          borderRadius: BorderRadius.circular(25),
-          border: Border.all(color: context.dividerColor),
-        ),
-        child: Row(
-          children: [
-             SizedBox(width: 14),
-             Icon(
-              Icons.search_rounded,
-              color: context.secondaryTextColor,
-              size: 20,
-            ),
-             SizedBox(width: 8),
-            Text(
-              'Cari produk fashion...',
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                color: context.secondaryTextColor,
-                fontWeight: FontWeight.w400,
+  Widget _buildInlineSearchBar(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => context.go('/search'),
+        child: Container(
+          height: 40,
+          margin: const EdgeInsets.only(left: 16, right: 8),
+          decoration: BoxDecoration(
+            color: context.surfaceColor,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: context.dividerColor),
+          ),
+          child: Row(
+            children: [
+              const SizedBox(width: 12),
+              Icon(
+                Icons.search_rounded,
+                color: context.tertiaryTextColor,
+                size: 20,
               ),
-            ),
-          ],
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Mau cari outfit apa hari ini?',
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    color: context.tertiaryTextColor,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -206,7 +245,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildSectionHeader(String title, {VoidCallback? onSeeAll}) {
     return Padding(
-      padding:  EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -214,20 +253,22 @@ class _HomePageState extends State<HomePage> {
           Text(
             title,
             style: GoogleFonts.poppins(
-              fontSize: 17,
+              fontSize: 18,
               fontWeight: FontWeight.w700,
               color: context.primaryTextColor,
+              letterSpacing: -0.3,
             ),
           ),
           if (onSeeAll != null)
             GestureDetector(
               onTap: onSeeAll,
               child: Text(
-                'Lihat Semua',
+                'Lihat Semua →',
                 style: GoogleFonts.poppins(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.accent,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primary,
+                  letterSpacing: -0.1,
                 ),
               ),
             ),
@@ -238,14 +279,14 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildBannerShimmer() {
     return Shimmer.fromColors(
-      baseColor: context.dividerColor,
-      highlightColor: context.isDarkMode ? AppColors.darkSurface : AppColors.shimmerHighlight,
+      baseColor: context.isDarkMode ? AppColors.shimmerBaseDark : AppColors.shimmerBase,
+      highlightColor: context.isDarkMode ? AppColors.shimmerHighlightDark : AppColors.shimmerHighlight,
       child: Container(
         height: 200,
-        margin:  EdgeInsets.symmetric(horizontal: 16),
+        margin: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
         ),
       ),
     );
@@ -256,12 +297,12 @@ class _HomePageState extends State<HomePage> {
       height: 44,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding:  EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: 5,
-        separatorBuilder: (context, index) =>  SizedBox(width: 8),
+        separatorBuilder: (context, index) => const SizedBox(width: 8),
         itemBuilder: (context, index) => Shimmer.fromColors(
-          baseColor: context.dividerColor,
-          highlightColor: context.isDarkMode ? AppColors.darkSurface : AppColors.shimmerHighlight,
+          baseColor: context.isDarkMode ? AppColors.shimmerBaseDark : AppColors.shimmerBase,
+          highlightColor: context.isDarkMode ? AppColors.shimmerHighlightDark : AppColors.shimmerHighlight,
           child: Container(
             width: 80,
             height: 36,
@@ -278,25 +319,25 @@ class _HomePageState extends State<HomePage> {
   Widget _buildErrorView(BuildContext context, String message) {
     return Center(
       child: Padding(
-        padding:  EdgeInsets.all(24),
+        padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-             Icon(
+            Icon(
               Icons.wifi_off_rounded,
               size: 64,
-              color: context.secondaryTextColor,
+              color: context.tertiaryTextColor,
             ),
-             SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
-              'Terjadi Kesalahan',
+              'Yah, Ada Masalah 🥲',
               style: GoogleFonts.poppins(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
                 color: context.primaryTextColor,
               ),
             ),
-             SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               message,
               style: GoogleFonts.poppins(
@@ -305,13 +346,13 @@ class _HomePageState extends State<HomePage> {
               ),
               textAlign: TextAlign.center,
             ),
-             SizedBox(height: 24),
+            const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () =>
                   context.read<HomeBloc>().add( HomeFetchData()),
-              icon:  Icon(Icons.refresh_rounded),
+              icon: const Icon(Icons.refresh_rounded),
               label: Text(
-                'Coba Lagi',
+                'Coba Lagi Dong',
                 style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
               ),
             ),

@@ -21,16 +21,16 @@ class ErrorView extends StatelessWidget {
 
   factory ErrorView.network({VoidCallback? onRetry}) => ErrorView(
         icon: Icons.wifi_off_rounded,
-        title: 'Tidak Ada Koneksi',
-        message: 'Periksa koneksi internet kamu dan coba lagi.',
+        title: 'Koneksi Ilang 📶',
+        message: 'Koneksi internet kamu lagi bermasalah nih. Cek dulu ya!',
         buttonLabel: 'Coba Lagi',
         onRetry: onRetry,
       );
 
   factory ErrorView.server({VoidCallback? onRetry}) => ErrorView(
         icon: Icons.cloud_off_rounded,
-        title: 'Terjadi Kesalahan',
-        message: 'Server sedang bermasalah. Coba beberapa saat lagi.',
+        title: 'Server Lagi Error ☁️',
+        message: 'Server kami lagi ada masalah. Coba beberapa saat lagi ya!',
         buttonLabel: 'Coba Lagi',
         onRetry: onRetry,
       );

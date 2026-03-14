@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:equatable/equatable.dart';
 
 abstract class ProfileEvent extends Equatable {
@@ -28,4 +30,13 @@ class ProfileUpdatePreferences extends ProfileEvent {
 
   @override
   List<Object?> get props => [preferenceIds];
+}
+
+class ProfileUploadAvatar extends ProfileEvent {
+  final File avatarFile;
+
+   const ProfileUploadAvatar({required this.avatarFile});
+
+  @override
+  List<Object?> get props => [avatarFile];
 }

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/either.dart';
@@ -66,6 +68,20 @@ class ProfileRepositoryImpl implements ProfileRepository {
     try {
       await remoteDataSource.updateStylePreferences(preferenceIds);
       return  Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } on AuthException catch (e) {
+      return Left(AuthFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, User>> uploadAvatar(File avatarFile) async {
+    try {
+      final model = await remoteDataSource.uploadAvatar(avatarFile);
+      return Right(model.toEntity());
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } on AuthException catch (e) {

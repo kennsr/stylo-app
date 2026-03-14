@@ -64,9 +64,10 @@ class _StyloTextFieldState extends State<StyloTextField> {
             fontSize: 13,
             fontWeight: FontWeight.w500,
             color: context.primaryTextColor,
+            letterSpacing: -0.1,
           ),
         ),
-         SizedBox(height: 6),
+        const SizedBox(height: 8),
         TextFormField(
           controller: widget.controller,
           obscureText: _isObscured,
@@ -82,48 +83,49 @@ class _StyloTextFieldState extends State<StyloTextField> {
             fontSize: 14,
             fontWeight: FontWeight.w400,
             color: context.primaryTextColor,
+            letterSpacing: -0.1,
           ),
           decoration: InputDecoration(
             hintText: widget.hint,
             hintStyle: GoogleFonts.poppins(
               fontSize: 14,
-              color: context.secondaryTextColor,
+              color: context.tertiaryTextColor,
+              letterSpacing: -0.1,
             ),
             filled: true,
-            fillColor: context.surfaceColor,
-            contentPadding:  EdgeInsets.symmetric(
+            fillColor: context.surfaceHighColor,
+            contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 14,
             ),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide:
-                   BorderSide(color: context.borderColor),
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide:
-                   BorderSide(color: context.borderColor),
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide:
-                   BorderSide(color: AppColors.accent, width: 1.5),
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
             ),
             errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide:  BorderSide(color: AppColors.error),
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.error, width: 1.5),
             ),
             focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide:
-                   BorderSide(color: AppColors.error, width: 1.5),
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.error, width: 2),
             ),
             prefixIcon: widget.prefixIcon != null
-                ? Icon(
-                    widget.prefixIcon,
-                    color: context.secondaryTextColor,
-                    size: 20,
+                ? Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Icon(
+                      widget.prefixIcon,
+                      color: context.tertiaryTextColor,
+                      size: 20,
+                    ),
                   )
                 : null,
             suffixIcon: widget.obscureText
@@ -132,7 +134,7 @@ class _StyloTextFieldState extends State<StyloTextField> {
                       _isObscured
                           ? Icons.visibility_off_outlined
                           : Icons.visibility_outlined,
-                      color: context.secondaryTextColor,
+                      color: context.tertiaryTextColor,
                       size: 20,
                     ),
                     onPressed: () =>
@@ -142,7 +144,7 @@ class _StyloTextFieldState extends State<StyloTextField> {
                     ? IconButton(
                         icon: Icon(
                           widget.suffixIcon,
-                          color: context.secondaryTextColor,
+                          color: context.tertiaryTextColor,
                           size: 20,
                         ),
                         onPressed: widget.onSuffixTap,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/stylo_svg_icon.dart';
 import '../../../../core/theme/theme_ext.dart';
 import '../bloc/wishlist_bloc.dart';
 import '../bloc/wishlist_event.dart';
@@ -142,19 +143,7 @@ class _WishlistPageState extends State<WishlistPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: 96,
-              height: 96,
-              decoration: BoxDecoration(
-                color: AppColors.accent.withValues(alpha: 0.08),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.favorite_border_rounded,
-                size: 48,
-                color: AppColors.accent,
-              ),
-            ),
+            const StyloLogo(size: 80),
             const SizedBox(height: 20),
             Text(
               'Wishlist Kosong',

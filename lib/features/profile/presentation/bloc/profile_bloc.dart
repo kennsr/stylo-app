@@ -4,6 +4,7 @@ import '../../domain/usecases/get_profile_usecase.dart';
 import '../../domain/usecases/get_style_preferences_usecase.dart';
 import '../../domain/usecases/update_profile_usecase.dart';
 import '../../domain/usecases/update_style_preferences_usecase.dart';
+import '../../domain/usecases/upload_avatar_usecase.dart';
 import 'profile_event.dart';
 import 'profile_state.dart';
 
@@ -12,16 +13,19 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final UpdateProfileUseCase updateProfileUseCase;
   final GetStylePreferencesUseCase getStylePreferencesUseCase;
   final UpdateStylePreferencesUseCase updateStylePreferencesUseCase;
+  final UploadAvatarUseCase uploadAvatarUseCase;
 
   ProfileBloc({
     required this.getProfileUseCase,
     required this.updateProfileUseCase,
     required this.getStylePreferencesUseCase,
     required this.updateStylePreferencesUseCase,
+    required this.uploadAvatarUseCase,
   }) : super( ProfileInitial()) {
     on<ProfileFetch>(_onFetch);
     on<ProfileUpdate>(_onUpdate);
     on<ProfileUpdatePreferences>(_onUpdatePreferences);
+    on<ProfileUploadAvatar>(_onUploadAvatar);
   }
 
   Future<void> _onFetch(ProfileFetch event, Emitter<ProfileState> emit) async {
@@ -90,6 +94,29 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         emit(ProfileLoaded(
           user: currentState.user,
           stylePreferences: updatedPrefs,
+        ));
+      },
+    );
+  }
+
+  Future<void> _onUploadAvatar(
+      ProfileUploadAvatar event, Emitter<ProfileState> emit) async {
+    final currentState = state;
+    emit( ProfileUpdating());
+
+    final result = await uploadAvatarUseCase(
+      UploadAvatarParams(avatarFile: event.avatarFile),
+    );
+
+    result.fold(
+      (failure) => emit(ProfileError(message: failure.message)),
+      (user) {
+        final prefs = currentState is ProfileLoaded
+            ? currentState.stylePreferences
+            : <dynamic>[];
+        emit(ProfileLoaded(
+          user: user,
+          stylePreferences: List.from(prefs),
         ));
       },
     );

@@ -31,7 +31,7 @@ class _CartPageState extends State<CartPage> {
           builder: (context, state) {
             final count = state is CartLoaded ? state.cart.totalItems : 0;
             return Text(
-              count > 0 ? 'Keranjang ($count)' : 'Keranjang',
+              count > 0 ? 'Keranjang ($count)' : 'Keranjang Belanja',
               style: GoogleFonts.poppins(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -96,7 +96,7 @@ class _CartPageState extends State<CartPage> {
                         ),
                       ),
                       child: Text(
-                        'Coba Lagi',
+                        'Coba Lagi Dong',
                         style: GoogleFonts.poppins(
                           color: AppColors.accent,
                           fontWeight: FontWeight.w600,

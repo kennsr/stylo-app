@@ -48,7 +48,7 @@ class NotificationsPage extends StatelessWidget {
       scrolledUnderElevation: 0.5,
       shadowColor: context.dividerColor,
       title: Text(
-        'Notifikasi',
+        'Notifikasi 🔔',
         style: GoogleFonts.poppins(
           fontSize: 18,
           fontWeight: FontWeight.w700,
@@ -66,7 +66,7 @@ class NotificationsPage extends StatelessWidget {
                       .add(const NotificationsMarkAllRead());
                 },
                 child: Text(
-                  'Tandai semua dibaca',
+                  'Tandai semua udah dibaca',
                   style: GoogleFonts.poppins(
                     fontSize: 13,
                     color: AppColors.accent,
@@ -210,7 +210,7 @@ class NotificationsPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Belum ada notifikasi',
+              'Belum ada notifikasi baru',
               style: GoogleFonts.poppins(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -219,7 +219,7 @@ class NotificationsPage extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Notifikasi terbaru kamu akan muncul di sini',
+              'Notifikasi terbaru bakal muncul di sini',
               style: GoogleFonts.poppins(
                 fontSize: 14,
                 color: context.secondaryTextColor,
@@ -249,7 +249,7 @@ class NotificationsPage extends StatelessWidget {
       child: ListView(
         children: [
           if (unread.isNotEmpty) ...[
-            _buildSectionLabel(context, 'Belum Dibaca'),
+            _buildSectionLabel(context, 'Baru'),
             ...unread.map(
               (notification) => Column(
                 children: [
@@ -265,7 +265,7 @@ class NotificationsPage extends StatelessWidget {
           if (read.isNotEmpty) ...[
             if (unread.isNotEmpty)
               Divider(height: 1, thickness: 4, color: context.surfaceColor),
-            _buildSectionLabel(context, 'Sudah Dibaca'),
+            _buildSectionLabel(context, 'Lainnya'),
             ...read.map(
               (notification) => Column(
                 children: [
